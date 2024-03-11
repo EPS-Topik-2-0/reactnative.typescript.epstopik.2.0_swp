@@ -1,0 +1,21 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/Hanuman-Bold.ttf",
+      "sha1": "26c804ded403e4ef89a5baba89077bb59075ebde"
+    },
+    {
+      "path": "assets/fonts/Hanuman-Regular.ttf",
+      "sha1": "714a490afe6590ebfa6eec72c1874b68b4619ae7"
+    },
+    {
+      "path": "assets/fonts/KhmerOSMuolLight.ttf",
+      "sha1": "74acc223c68b76354c25097c5f812f365183d2ea"
+    },
+    {
+      "path": "assets/fonts/Moul.ttf",
+      "sha1": "46ffe8392fc5865f77528c5967154d957f0565c4"
+    }
+  ]
+}

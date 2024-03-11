@@ -1,0 +1,34 @@
+cd android && ./gradlew assembleRelease
+
+=======================================
+key store debug
+What is your first and last name?
+  [Unknown]:  esptopikapp
+What is the name of your organizational unit?
+  [Unknown]:  esptopikapp
+What is the name of your organization?
+  [Unknown]:  amatak
+What is the name of your City or Locality?
+  [Unknown]:  phnom penh
+What is the name of your State or Province?
+  [Unknown]:  phnom penh
+What is the two-letter country code for this unit?
+  [Unknown]:  kh
+
+key store release
+name : esptopikapp
+pass: @esptopikapp12345@
+alias:esptopikapp
+
+What is your first and last name?
+  [Unknown]:  esptopikapp
+What is the name of your organizational unit?
+  [Unknown]:  esptopikapp
+What is the name of your organization?
+  [Unknown]:  amatak
+What is the name of your City or Locality?
+  [Unknown]:  phnom penh
+What is the name of your State or Province?
+  [Unknown]:  phnom penh
+What is the two-letter country code for this unit?
+  [Unknown]:  kh

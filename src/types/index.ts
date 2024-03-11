@@ -1,0 +1,44 @@
+export * from "./type.schedule";
+export * from './type.job';
+
+export type typeLanguages = "en" | "zh";
+
+export type typeIcon =
+  | "AntDesign"
+  | "Entypo"
+  | "EvilIcons"
+  | "Feather"
+  | "FontAwesome"
+  | "FontAwesome5"
+  | "FontAwesome5Pro"
+  | "Fontisto"
+  | "Ionicons"
+  | "Foundation"
+  | "MaterialCommunityIcons"
+  | "Octicons"
+  | "SimpleLineIcons"
+  | "Zocial"
+  | "MaterialIcons";
+
+export type typeTheme = "light" | "dark";
+
+export interface iUsers {
+  login: string;
+  id: number;
+  node_id: string;
+  avatar_url: string;
+  gravatar_id: any;
+  url: string;
+  html_url: string;
+  followers_url: string;
+  following_url: string;
+  gists_url: string;
+  starred_url: string;
+  subscriptions_url: string;
+  organizations_url: string;
+  repos_url: string;
+  events_url: string;
+  received_events_url: string;
+  type: string;
+  site_admin: boolean;
+}
