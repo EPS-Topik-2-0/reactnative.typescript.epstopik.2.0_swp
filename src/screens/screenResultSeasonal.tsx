@@ -8,29 +8,25 @@ import {
   Linking,
   Image,
   RefreshControl,
-  ActivityIndicator
+  ActivityIndicator,
+  Alert
 } from "react-native";
 import Layout from "../layout";
 import I18n from "../i18n";
 import themes from "../themes";
-import { useRoute } from '@react-navigation/native';
 import NavigationServer from "../services/navgationService";
 import { showMessage } from "react-native-flash-message";
 import { navRoutes } from "../navigation/navRoutes";
 import moment from "moment";
-import {axios} from "../api/";
-import {API_URL} from '../api/config';
+import {API_URL_SWP} from '../api/config';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { keystores } from "../constants";
 
-
-export default function ScreenLogin(props: any) {
-  const route = useRoute();
-  const dataSchedule = route.params as any;
-  const resultProfile=props?.resultProfile;
-  const errorResultProfile=props?.errorResultProfile;
+export default function ScreenResultSeasonal(props: any) {
+  const resultProfileSeasonal=props?.resultProfileSeasonal;
   const [key, setKey] = React.useState(0)
   const [refreshing, setRefreshing] = React.useState(false);
-  const [isLoading, setLoading] = React.useState(true);
-  const [isImageProfile,setImageProfile]=React.useState('');
+  const [isLoading, setLoading] = React.useState(false);
   const [isErrorImage,setErrorImage]=React.useState(false);
   const [isLoadingImage,setLoadingImage]=React.useState(true);
   const [isResultProfile, setResultProfile] = React.useState<
@@ -48,78 +44,38 @@ export default function ScreenLogin(props: any) {
     phone: string,
   }
   >();
-  const [isScheduleInfo,setScheduleInfo]=React.useState<{
-    aba: number,
-    bakong: number, 
-    dateEnd:string,
-    dateStart:string, 
-    folder:string, 
-    id: number, 
-    maxBirthday:string, 
-    minBirthday:string, 
-    name:string, 
-    open: number, 
-    price:number, 
-    special: number, 
-    status: number, 
-    wing: number
-  }>({
-    aba: 0, 
-    bakong: 0, 
-    dateEnd:"",
-    dateStart: "",
-    folder:"",
-    id: 0, maxBirthday: "", 
-    minBirthday: "",
-    name: "",open: 0, price: 28, 
-    special: 0, status: 1, wing: 0
-  });
-
-  const getProfile = async (payload: any) => {
-    try {
-      const response = await axios.get('result-form/'+ 0 + "/" + new Date().getTime());
-      if (Object(response?.data)?.message === 'success') {
-        setResultProfile({
-          ...Object(response)?.data?.data[0]
-        });
-        setLoading(false);
-      }else{
-        setTimeout(()=>{
-          setLoading(false);
-          NavigationServer.reset(navRoutes.MAIN);
-        },3000)
-      }
-    } catch (error) {
-      setTimeout(()=>{
-        setLoading(false);
-        NavigationServer.reset(navRoutes.MAIN);
-      },3000)
-    }
-  };
 
   React.useEffect(()=>{
-    setRefreshing(true);
-    getProfile({schedule:dataSchedule?.id});
-    // Not Login 
-    if(dataSchedule && dataSchedule?.id>0){
-      setScheduleInfo({...dataSchedule});
-    }
-  },[dataSchedule]);
+    handleRequest();
+  },[]);
 
   // RESULT PROFILE
   React.useEffect(()=>{
-    if(resultProfile && resultProfile?.message==='success'){
-      const data=resultProfile?.data[0];
-      const url=API_URL+"/api"+'/images?class='+data?.folder+'&code='+data?.image;
-      setResultProfile({
-        ...resultProfile?.data[0]
-      });
-      setImageProfile(``);
-      setTimeout(()=>{
-        setImageProfile(url);
-      },1000);
+    if(typeof resultProfileSeasonal!=='undefined' && (isLoading || refreshing)){
+      if(resultProfileSeasonal && resultProfileSeasonal?.message==='success'){
+        setResultProfile({
+          ...resultProfileSeasonal?.data[0]
+        });
+      }else{
+        if(resultProfileSeasonal && resultProfileSeasonal?.message==='empty'){
+          Alert.alert(
+            `${I18n.t('titleGotResultInfo')}`,
+            `${I18n.t('cannotGotResultInfo')}`,
+            [
+              {
+                text: `${I18n.t('confirm')}`,
+                onPress: () => NavigationServer.reset(navRoutes.MAIN),
+              },
+            ],
+            { cancelable: false }
+          );
+        }
+      }
     }
 
+  },[resultProfileSeasonal]);
+
+  React.useEffect(()=>{
     if(refreshing){
       showMessage({
         message: I18n.t("messageRefetchDataResultProfile"),
@@ -127,52 +83,43 @@ export default function ScreenLogin(props: any) {
         backgroundColor: themes.Primary.success,
         color: "white",
         icon: 'success',
-        duration: 7000,
+        duration: 3500,
       });
       setLoading(false);
      
       setTimeout(()=>setRefreshing(false),3000);
     }
-  },[resultProfile,refreshing]);
-
-  // RESULT PROFILE
-  React.useEffect(()=>{
-    if(errorResultProfile && errorResultProfile?.message==='empty'){
-      // Alert.alert(
-      //   `${I18n.t('titlePleaseRequiredLogin')}`,
-      //   `${I18n.t('messagePleaseRequiredLogin')}`,
-      //   [
-      //     {
-      //       text: `${I18n.t('login')}`,
-      //       onPress: () => NavigationServer.reset(navRoutes.MAIN),
-      //     },
-      //   ],
-      //   { cancelable: false }
-      // );
-    }
-  },[errorResultProfile]);
+  },[refreshing])
   
   const handleRequest = async () => {
-    getProfile({schedule:isScheduleInfo?.id});
+    setLoading(true);
+    AsyncStorage.getItem(keystores.scheduleSeasonalInfo).then((res)=>{
+     if(res && typeof res !=='undefined'){
+      const scheduleSeasonal=JSON.parse(res);
+      if (props?.useResultProfileSeasonal) props?.useResultProfileSeasonal({ schedule: scheduleSeasonal?.id })
+     }else{
+          setTimeout(()=>{
+            setLoading(false);
+            NavigationServer.reset(navRoutes.MAIN);
+          },3000)
+        }
+    }).finally(()=>{
+      setTimeout(()=> setLoading(false),3000)
+    })
   };
   const onRefresh = () => {
     setRefreshing(true);
     handleRequest();
     setKey(key+1);
-    const url=API_URL+"/api"+'/images?class='+isResultProfile?.folder+'&code='+isResultProfile?.image;
-    setImageProfile(``);
-    setTimeout(()=>{
-      setImageProfile(url);
-    },1000);
   };
   return (
     <>
       <Layout
-        typeHeaderResult
+        typeHeaderResultSeasonal
         labelLoading={`${I18n.t('loading')}`}
         loading={isLoading || refreshing}
         handleLeftMenus={() => props.navigation.toggleDrawer()}
-        resultTitle={`អ្នកបានបង់ប្រាក់ជូន`}
+        resultTitle={`អ្នកបានស្នើសុំមកកាន់`}
         resultSubTitle={"HRD-Korea រួចរាល់"}
         handleRightNotification={() => NavigationServer.navigate(navRoutes.NOTIFICATION)}
       >
@@ -206,7 +153,7 @@ export default function ScreenLogin(props: any) {
               !isLoading?
               <Image
                 source={{uri:
-                `${API_URL}/image/${isResultProfile?.folder}/${isResultProfile?.image}`
+                `${API_URL_SWP}/image/${isResultProfile?.folder}/${isResultProfile?.image}`
                 ,cache:'reload'}}
                 resizeMode="contain" style={{ height: 200,width:'100%' }} />:null
             }
@@ -267,7 +214,7 @@ export default function ScreenLogin(props: any) {
           style={{
             paddingTop: 15,
             paddingBottom: 15,
-            backgroundColor: "#869b00",
+            backgroundColor: themes.Primary.mainColor,
           }}
         >
           <Text

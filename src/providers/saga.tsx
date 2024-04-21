@@ -6,8 +6,9 @@ import { saga as userSaga } from "../modules/user/user.saga";
 import { saga as scheduleSaga } from "../modules/schedule/schedule.saga";
 import { saga as paymentSaga } from "../modules/payment/payment.saga";
 import { saga as termOfUseSaga } from "../modules/termOfUse/termOfUse.saga";
+import { saga as scheduleSeasonalSaga } from "../modules/scheduleSeasonal/scheduleSeasonal.saga";
 
-const sagas = [homeSaga(), appSaga(), notificationSaga(), userSaga(),scheduleSaga(),paymentSaga(),termOfUseSaga()];
+const sagas = [homeSaga(), appSaga(), notificationSaga(), userSaga(),scheduleSaga(),paymentSaga(),termOfUseSaga(),scheduleSeasonalSaga()];
 
 export default function* () {
   yield all(sagas);

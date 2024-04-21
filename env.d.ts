@@ -18,5 +18,6 @@ declare module '@env' {
    export const WING_AUTHORIZATION:string;
    export const WING_REFERER:string;
    export const WING_CHECK_TRANSACTION:string;
+   export const API_HOST_SWP:string;
    
  }

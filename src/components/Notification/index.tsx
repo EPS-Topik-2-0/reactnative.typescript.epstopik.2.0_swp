@@ -3,7 +3,7 @@ import {
   StyleSheet,
   Text,
   Platform,
-  TouchableOpacity,
+  TouchableNativeFeedback,
   View,
 } from "react-native";
 
@@ -15,7 +15,7 @@ export default function Notification(data: any) {
   const viewing = data?.viewing;
 
   return (
-    <TouchableOpacity
+    <TouchableNativeFeedback
       onPress={() => data?.onPress()}
       style={{ marginBottom: 15 }}
     >
@@ -48,7 +48,7 @@ export default function Notification(data: any) {
           <Text style={styles.txtDate}>១៧-ធ្នូ-២០២៣</Text>
         </View>
       </View>
-    </TouchableOpacity>
+    </TouchableNativeFeedback>
   );
 }
 

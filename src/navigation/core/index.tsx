@@ -6,7 +6,7 @@ import ScreenLogin from "../../containers/screenLoginContainer";
 import ScreenSignup from "../../containers/screenSignupContainer";
 import ScreenGuide from "../../containers/screenGuideContainer";
 import ScreenTermOfUsed from "../../containers/screenTermOfUsedContainer";
-import ScreenCard from "../../containers/screenCardSceduleContainer";
+import ScreenCard from "../../containers/screenCardScheduleContainer";
 
 export default function RootCore() {
   const Stack = createNativeStackNavigator();

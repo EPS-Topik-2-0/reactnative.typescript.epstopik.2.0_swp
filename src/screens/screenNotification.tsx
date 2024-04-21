@@ -16,9 +16,6 @@ import themes from "../themes";
 import NavigationService from "../services/navgationService";
 
 export default function ScreenHome(props: any) {
-  const {
-    formState: { errors },
-  } = useForm();
   const [refreshing, setRefreshing] = React.useState(false);
   const notifications = props?.notifications;
   const [isIdViewing, setIdViewing] = React.useState(-1);

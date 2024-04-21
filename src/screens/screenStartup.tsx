@@ -9,7 +9,6 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   ActivityIndicator,
-  TouchableOpacity,
 } from "react-native";
 import Layout from "../layout";
 import { MLwithHRD } from "../assets";

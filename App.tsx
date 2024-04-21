@@ -212,7 +212,6 @@ const App = () => {
     setInterval(async () => {
       if (isInternet) {
         console.log('API_HOST',API_HOST)
-        // console.log("refreshToken");
       }
     }, 1000 * 50);
   }, [isInternet]);
@@ -226,6 +225,7 @@ const App = () => {
         : "website"
     }/${new Date().getTime()}`;
     try {
+      console.log("URL API",axios.defaults.baseURL);
       await axios
         .get(url,{timeout: 5000,})
         .then(async (result) => {
@@ -271,6 +271,7 @@ const App = () => {
           }
         })
         .catch((error) => {
+          console.log("----error",error);
           setDisable({
             visible: false,
             message: "",

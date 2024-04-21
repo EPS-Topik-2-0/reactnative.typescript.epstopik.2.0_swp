@@ -7,8 +7,10 @@ import ScreenLogin from "../../containers/screenLoginContainer";
 import ScreenSignup from "../../containers/screenSignupContainer";
 import ScreenGuide from "../../containers/screenGuideContainer";
 import ScreenTermOfUsed from "../../containers/screenTermOfUsedContainer";
-import ScreenCard from "../../containers/screenCardSceduleContainer";
-import ScreenForm from "../../containers/screenFormSceduleContainer";
+import ScreenCard from "../../containers/screenCardScheduleContainer";
+import ScreenCardSeasonal from "../../containers/screenCardScheduleSeasonalContainer";
+import ScreenForm from "../../containers/screenFormScheduleContainer";
+import ScreenFormSeasonal from "../../containers/screenFormScheduleSeasonalContainer";
 import ScreenInfo from "../../containers/screenInfoContainer";
 import ScreenFacebook from "../../containers/screenFacebookContainer";
 import ScreenAboutUs from "../../containers/screenAboutUsContainer";
@@ -34,7 +36,9 @@ export default function RootMain() {
       <Stack.Screen name={navRoutes.GUIDE} component={ScreenGuide} />
       <Stack.Screen name={navRoutes.SIGNUP} component={ScreenSignup} />
       <Stack.Screen name={navRoutes.CARD} component={ScreenCard} />
+      <Stack.Screen name={navRoutes.CARD_SEASONAL} component={ScreenCardSeasonal} />
       <Stack.Screen name={navRoutes.FORM} component={ScreenForm} />
+      <Stack.Screen name={navRoutes.FORM_SEASONAL} component={ScreenFormSeasonal} />
       <Stack.Screen name={navRoutes.INFO} component={ScreenInfo} />
       <Stack.Screen name={navRoutes.TERMOfUSE} component={ScreenTermOfUsed} />
       <Stack.Screen name={navRoutes.FACEBOOK} component={ScreenFacebook} />

@@ -1,0 +1,7 @@
+import { API_HOST,ABA_CRYPTO,ABA_PURCHASE,API_HOST_SWP } from '@env';
+
+export const API_URL=API_HOST;
+export const API_URL_SWP=API_HOST_SWP;
+export const ABA_CRYPTO_URL=ABA_CRYPTO;
+export const ABA_PURCHASE_URL=ABA_PURCHASE;
+

@@ -9,7 +9,7 @@ import { LOGIN_REQUEST,
   } from "./index";
 import { navRoutes } from "../../navigation/navRoutes";
 import NavgationServiece from "../../services/navgationService";
-import { axios } from "../../api";
+import { axios,axiosSWP } from "../../api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { keystores } from "../../constants";
 import { LOGOUT_REQUEST, LOGOUT_SUCCESS } from "../app";
@@ -21,6 +21,9 @@ function* userWorker(payload: unknown) {
       Object(payload)?.payload
     );
     yield (axios.defaults.headers.common = {
+      Authorization: `Bearer ${Object(data)?.data?.token}`
+    });
+    yield (axiosSWP.defaults.headers.common = {
       Authorization: `Bearer ${Object(data)?.data?.token}`
     });
     yield call(AsyncStorage.setItem, keystores.user, JSON.stringify(data));
@@ -66,6 +69,9 @@ function* userSingUpWorker(payload: unknown) {
       Object(payload)?.payload
     );
     yield (axios.defaults.headers.common = {
+      Authorization: `Bearer ${Object(data)?.data?.token}`
+    });
+    yield (axiosSWP.defaults.headers.common = {
       Authorization: `Bearer ${Object(data)?.data?.token}`
     });
     yield call(AsyncStorage.setItem, keystores.user, JSON.stringify(data));

@@ -14,6 +14,7 @@ import { ViewTheme } from "../components";
 import Header from "./header";
 import HeaderSchedule from "./headerSchedule";
 import HeaderResult from "./headerResult";
+import HeaderResultSeasonal from "./headerResultSeasonal";
 
 import { typeTheme } from "../types";
 import themes from "../themes";
@@ -69,7 +70,19 @@ export default function Layout(props: iLayoutProps | any) {
           resultSubTitle={props.resultSubTitle}
         />
       ):
-      
+      props?.typeHeaderResultSeasonal?(
+        <HeaderResultSeasonal
+          loading={props?.loading}
+          handleLeftBack={props.handleLeftBack}
+          handleLeftBackLabel={props.handleLeftBackLabel}
+          handleRightNotification={props.handleRightNotification}
+          handleLeftMenus={props.handleLeftMenus}
+          centerTitle={props.centerTitle}
+          handleRightRegister={props.handleRightRegister}
+          handleRightRegisterLabel={props.handleRightRegisterLabel}
+          resultTitle={props.resultTitle}
+          resultSubTitle={props.resultSubTitle}
+        />):
       (
         <Header
           loading={props?.loading}
@@ -106,7 +119,7 @@ export default function Layout(props: iLayoutProps | any) {
               width: "100%",
               height: "100%",
               backgroundColor: themes.Primary.colorGrey100,
-              opacity: 0.95,
+              opacity: 1,
               top: 1,
             }}
           >

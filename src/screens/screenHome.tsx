@@ -7,9 +7,8 @@ import {
   View,
   Image,
   RefreshControl,
-  Dimensions,Linking
+  Dimensions,
 } from "react-native";
-import { Schedule,ActivityIndicatorTheme } from "../components";
 import Layout from "../layout";
 import {
   MLwithHRD,
@@ -18,7 +17,8 @@ import {
   IcTermOfUseWhite,
   IcQuestionWhite,
   IcContact,
-  IcAboutUs
+  IcAboutUs,
+  IcFormSWP
 } from "../assets";
 import I18n from "../i18n";
 import themes from "../themes";
@@ -33,10 +33,12 @@ const { width } = Dimensions.get('window');
 
 export default function ScreenHome(props: any) {
   const [refreshing, setRefreshing] = React.useState(false);
+  const [loadingSWP, setLoadingSWP] = React.useState(true);
   const homeLoading = props?.homeLoading;
   const schedules: ResponseSchedule = props?.schedules;
   const errorSchedules = props?.errorSchedules;
   const [isLogged, setLogged] = React.useState(false);
+  const [isSWPinfo, setSWPinfo] = React.useState({});
 
   const handleRequest = async () => {
     if (props?.useSchedules) await props?.useSchedules(0);
@@ -56,6 +58,19 @@ export default function ScreenHome(props: any) {
   },[errorSchedules])
   React.useEffect(() => {
     handleRequest();
+    setLoadingSWP(true);
+    AsyncStorage.getItem(keystores.sideInfo).then((info)=>{
+      if(info && typeof info!='undefined'){
+        const parseInfo=JSON.parse(info);
+        setSWPinfo({
+          active:parseInfo.activeSWP,
+          title:parseInfo.titleSWP
+        })
+      }
+    }).finally(()=>{
+      setLoadingSWP(false);
+    });
+
     (async()=>{
       const userInfo = await AsyncStorage.getItem(keystores.user);
       if (userInfo) {
@@ -82,7 +97,7 @@ export default function ScreenHome(props: any) {
   }
   return (
     <Layout
-    loading={homeLoading || refreshing }
+    loading={homeLoading || refreshing ||loadingSWP }
     handleLeftMenus={() => props.navigation.toggleDrawer()}
   >
       <React.Fragment>
@@ -108,6 +123,21 @@ export default function ScreenHome(props: any) {
           </View>
           <Text style={styles.txtLabel}>{`${I18n.t('byForm')}`}</Text>
           </TouchableOpacity>
+          {
+            typeof Object(isSWPinfo).active!=='undefined' &&
+            Object(isSWPinfo).active &&  Object(isSWPinfo).active>0
+            ?
+          <TouchableOpacity 
+          onPress={()=>NavigationService.navigate(navRoutes.FORM_SEASONAL)}
+          style={styles.gridItem}>
+          <View
+           style={styles.styBtn}
+           >
+            <IcFormSWP width={75} height={75}/>
+          </View>
+          <Text style={styles.txtLabel}>{`${Object(isSWPinfo).title}`}</Text>
+          </TouchableOpacity>:null
+          }
           <TouchableOpacity 
           onPress={()=>NavigationService.navigate(navRoutes.NOTIFICATION)}
           style={styles.gridItem}>
@@ -133,23 +163,6 @@ export default function ScreenHome(props: any) {
           <Text style={styles.txtLabel} numberOfLines={1}>{`${I18n.t('termOfUse')}`}</Text>
           </TouchableOpacity>
           <TouchableOpacity 
-          // onPress={async()=>{
-          //   try{
-          //   await AsyncStorage.getItem(keystores.sideInfo).then((e)=>{
-          //     if(e && typeof e!=='undefined'){
-          //       const info=JSON.parse(e);
-          //       Linking.openURL(Object(info)?.infoLink).catch(()=>{
-          //         alertMessageErrorLinkInfo();
-          //       })             
-          //     }else{
-          //       alertMessageErrorLinkInfo();
-          //     }
-          //   })
-          // }catch(err){
-          //   alertMessageErrorLinkInfo();
-          // }
-
-          // }}
           onPress={()=>NavigationService.navigate(navRoutes.INFO)}
           style={styles.gridItem}>
           <View style={styles.styBtn}>
@@ -210,7 +223,7 @@ const styles = StyleSheet.create({
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent:'center'
+    justifyContent:'flex-start'
   },
   gridItem: {
     width: width/2, // Divide the screen width by 3 for 3 columns
