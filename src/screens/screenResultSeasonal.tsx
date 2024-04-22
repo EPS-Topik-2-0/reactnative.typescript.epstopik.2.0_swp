@@ -42,6 +42,7 @@ export default function ScreenResultSeasonal(props: any) {
     name: string, 
     passport: string, 
     phone: string,
+    place:string
   }
   >();
 
@@ -186,7 +187,7 @@ export default function ScreenResultSeasonal(props: any) {
             <Text style={styles.txt_form}>
               លេខអត្តសញ្ញាណប័ណ្ណ ឬលេខលិខិតឆ្លងដែន
             </Text>
-
+           
             <Text style={styles.txt_form}>
               ប្រភេទការងារ៖ <Text style={{ fontSize: 20 }}>
               {isResultProfile?.mainJobName || 'N / A'}
@@ -197,6 +198,12 @@ export default function ScreenResultSeasonal(props: any) {
               {isResultProfile?.jobName || 'N / A'}
               </Text>
             </Text>
+            <Text style={[styles.txt_form]}>
+              អាស័យដ្ឋាន
+            </Text>
+            <Text style={{ fontSize: 14,color:themes.Primary.colorTextBlack }}>
+              {isResultProfile?.place || 'N / A'}
+              </Text>
             <Text style={{ fontSize: 18, alignSelf: "center", marginTop: 30,color:themes.Primary.colorTextBlack  }}>
               កាលបរិច្ឆេទចុះឈ្មោះសុំធ្វើតេស្ត៖
             </Text>
