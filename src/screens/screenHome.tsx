@@ -18,7 +18,7 @@ import {
   IcQuestionWhite,
   IcContact,
   IcAboutUs,
-  IcFormSWP
+  IcFormSWPA
 } from "../assets";
 import I18n from "../i18n";
 import themes from "../themes";
@@ -133,7 +133,7 @@ export default function ScreenHome(props: any) {
           <View
            style={styles.styBtn}
            >
-            <IcFormSWP width={75} height={75}/>
+            <Image source={IcFormSWPA} style={{width:90,height:90}} />
           </View>
           <Text style={styles.txtLabel}>{`${Object(isSWPinfo).title}`}</Text>
           </TouchableOpacity>:null
