@@ -3,7 +3,9 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { navRoutes } from "../navRoutes";
 import ScreenNotification from "../../containers/screenNotificationContainer";
 import ScreenLogin from "../../containers/screenLoginContainer";
+import ScreenLoginSWP from "../../containers/screenLoginSeasonalContainer";
 import ScreenSignup from "../../containers/screenSignupContainer";
+import ScreenSignupSWP from "../../containers/screenSignupSeasonalContainer";
 import ScreenGuide from "../../containers/screenGuideContainer";
 import ScreenTermOfUsed from "../../containers/screenTermOfUsedContainer";
 import ScreenCard from "../../containers/screenCardScheduleContainer";
@@ -22,9 +24,11 @@ export default function RootCore() {
         component={ScreenNotification}
       />
       <Stack.Screen name={navRoutes.LOGIN} component={ScreenLogin} />
+      <Stack.Screen name={navRoutes.LOGIN_SWP} component={ScreenLoginSWP} />
       <Stack.Screen name={navRoutes.GUIDE} component={ScreenGuide} />
       <Stack.Screen name={navRoutes.TERMOfUSE} component={ScreenTermOfUsed} />
       <Stack.Screen name={navRoutes.SIGNUP} component={ScreenSignup} />
+      <Stack.Screen name={navRoutes.SIGNUP_SWP} component={ScreenSignupSWP} />
       <Stack.Screen name={navRoutes.CARD} component={ScreenCard} />
     </Stack.Navigator>
   );

@@ -6,6 +6,7 @@ export { default as IcNotification } from "./icNotification.svg";
 export { default as IcNotificationWhite } from "./icNotificationWhite.svg";
 export { default as IcTermOfUseWhite } from "./icTermOfUseWhite.svg";
 export { default as MLwithHRD } from "./MLwithHRD.png";
+export { default as ML } from "./ML.png";
 export { default as IcUserAdd } from "./icUserAdd.svg";
 export { default as IcUserAddMainColor } from "./icUserAddMainColor.svg";
 export { default as IcCall } from "./icCall.svg";

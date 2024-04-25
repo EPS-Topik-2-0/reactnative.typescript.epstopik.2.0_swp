@@ -114,8 +114,6 @@ function* submitFormSeasonalWorker(payload: any) {
     formData.append('gender', Object(payload)?.payload?.gender);
     formData.append('birthday', Object(payload)?.payload?.birthday);
     formData.append('passport', Object(payload)?.payload?.passport);
-    formData.append('job', Object(payload)?.payload?.job);
-    formData.append('subJob', Object(payload)?.payload?.subJob);
     formData.append('phone', Object(payload)?.payload?.phone);
     formData.append('device',Platform.OS==='ios'?'ios':'android');
     formData.append('schedule', Object(payload)?.payload?.schedule);
@@ -130,6 +128,11 @@ function* submitFormSeasonalWorker(payload: any) {
       uri: payload?.payload?.['imagePass']?.path,
       type: payload?.payload?.['imagePass']?.mime,
       name: payload?.payload?.['imagePass']?.path.split('/').pop(),
+    });
+    formData.append('fmlbook', {
+      uri: payload?.payload?.['fmlbook']?.path,
+      type: payload?.payload?.['fmlbook']?.mime,
+      name: payload?.payload?.['fmlbook']?.path.split('/').pop(),
     });
     const responseSubmit:SagaReturnType<any> = yield call(axiosSWP.post,"/submit-form-seasonal",formData,{headers:{
       'Content-Type': 'multipart/form-data',

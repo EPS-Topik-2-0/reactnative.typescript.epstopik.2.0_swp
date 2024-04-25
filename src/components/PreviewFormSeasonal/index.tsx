@@ -11,10 +11,7 @@ import {
   SafeAreaView,
 } from "react-native";
 import moment from "moment";
-import { ABA } from "../../assets";
 import I18n from "../../i18n";
-
-import { useForm } from "react-hook-form";
 import themes from "../../themes";
 
 export default function PreviewForm(props: any) {
@@ -147,42 +144,8 @@ export default function PreviewForm(props: any) {
                 </Text>
               </View>
             </View>
-            <View style={{ flexDirection: "row", marginVertical: 5 }}>
-              <View style={{ width: "50%" }}>
-                <Text style={{ fontSize: 12,color:themes.Primary.colorTextBlack }}>
-                  <Text style={{ fontSize: 10, color: "red" }}> * </Text>
-                  ប្រភេទការងារ ៖
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    marginLeft: 20,
-                    fontFamily: themes.FontFamily.Hanuman,
-                    color:themes.Primary.colorTextBlack
-                  }}
-                >
-                  {data?.jobTitle}
-                </Text>
-              </View>
-              <View style={{ width: "50%" }}>
-                <Text style={{ fontSize: 12 ,color:themes.Primary.colorTextBlack}}>
-                  <Text style={{ fontSize: 10, color: "red" }}> * </Text>
-                  ការងារបន្ទាប់បន្សំ ៖
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    marginLeft: 20,
-                    fontFamily: "OdorMeanChey-Regular",
-                    color:themes.Primary.colorTextBlack
-                  }}
-                >
-                  {data?.jobSubTitle}
-                </Text>
-              </View>
-            </View>
           </View>
-          <View style={[styles.codeExam, { marginBottom: 50 }]}>
+          <View style={[styles.codeExam]}>
             <Text style={{ fontSize: 12,color:themes.Primary.colorTextBlack }}>
               <Text style={{ fontSize: 10, color: "red" }}> * </Text>
               រូបថតអត្តសញ្ញាណប័ណ្ណ ឬលិខិតឆ្លងដែន
@@ -211,6 +174,39 @@ export default function PreviewForm(props: any) {
                     borderColor: "black",
                   },
                   data?.imagePass && { aspectRatio: 1.5 },
+                ]}
+              />
+            )}
+          </View>
+          <View style={[styles.codeExam, { marginBottom: 50 }]}>
+            <Text style={{ fontSize: 12,color:themes.Primary.colorTextBlack }}>
+              <Text style={{ fontSize: 10, color: "red" }}> * </Text>
+              {I18n.t('bookMark')}
+            </Text>
+            {Platform.OS === "ios" ? (
+              <Image
+                source={{ uri: data?.fmlbook?.["sourceURL"] }}
+                style={{
+                  padding: 0,
+                  resizeMode: "contain",
+                  alignSelf: "center",
+                  height: 220,
+                  width: "100%",
+                  borderColor: "black",
+                }}
+              />
+            ) : (
+              <Image
+                source={{
+                  uri: `data:image/png;base64,${data?.fmlbook?.["data"]}`,
+                }}
+                style={[
+                  {
+                    width: "100%",
+                    resizeMode: "contain",
+                    borderColor: "black",
+                  },
+                  data?.fmlbook && { aspectRatio: 1.5 },
                 ]}
               />
             )}

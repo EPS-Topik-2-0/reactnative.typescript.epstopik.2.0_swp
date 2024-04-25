@@ -21,10 +21,7 @@ import {
 } from "../components";
 import Layout from "../layout";
 import {
-  ABA,
-  KHQR,
-  WingBank,
-  MLwithHRD
+  ML
 } from "../assets";
 import I18n from "../i18n";
 import { useForm } from "react-hook-form";
@@ -35,46 +32,42 @@ import Navigation from "../services/navgationService";
 import { navRoutes } from "../navigation/navRoutes";
 import NavigationServer from "../services/navgationService";
 import { showMessage } from "react-native-flash-message";
-import { iJob } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { keystores } from "../constants";
-import CryptoJS from 'crypto-js';
 import LoadingPayment from "../components/LoadingPayment";
-import {axios} from "../api";
-import { Base64 }  from "js-base64";
 import { trimEmptyString } from "../utils";
 import {isValidPhoneNumber,sendMessagePushBackError} from "../helper";
 
 const {  height } = Dimensions.get('window');
-interface iLabelJob { label: string; value: string | number }[];
 function NoSchedule() {
   return (
     <View style={{height:height-120,flex:1,width:'100%'}}>
       <View style={{flex:1,flexDirection:"column",alignItems:'center'}}>
       <View style={{flex:.3,marginTop:50}}>
-        <Image source={MLwithHRD} style={styles.imageLogo} />
+        <Image source={ML} style={styles.imageLogo} />
       </View>
       <View style={{flex:.7,justifyContent:'center',paddingHorizontal:20}}>
         <Text
           style={{
-            marginTop:-120,
+            marginTop:-100,
             textAlign: "center",
             fontSize: 18,
             fontFamily: themes.FontFamily.MuolLight,
             color: themes.Primary.colorRed100,
           }}
         >
-          {I18n.t("wordSorry")}
+          {I18n.t("wordSorrySWP")}
         </Text>
         <Text
           style={{
+            width:220,
             fontSize:15,
             fontFamily:themes.FontFamily.Hanuman,
             textAlign: "center",
             color: themes.Primary.colorRed100,
           }}
         >
-          {I18n.t("wanningNoSchedule1")}
+          {I18n.t("wanningNoSchedule1SWP")}
         </Text>
       </View>
       <View
@@ -88,7 +81,7 @@ function NoSchedule() {
         <Text
           style={{ textAlign: "center", color: themes.Primary.colorTextWhite,fontSize:16 }}
         >
-          {I18n.t("wanningNoSchedule2")}
+          {I18n.t("wanningNoSchedule2SWP")}
         </Text>
         <View style={{ flexDirection: "row", justifyContent: "center" }}>
           <TouchableOpacity
@@ -104,9 +97,17 @@ function NoSchedule() {
                 textDecorationLine: "underline",
               }}
             >
-              គេហទំព័រ,
+              គេហទំព័រ 
             </Text>
           </TouchableOpacity>
+          <Text  style={{
+                fontSize:16,
+                color:themes.Primary.colorTextWhite,
+                textAlign: "center",
+                marginLeft:5
+              }}>
+          និង
+          </Text>
           <TouchableOpacity
             style={{ marginStart: 5 }}
             onPress={() => {
@@ -124,9 +125,6 @@ function NoSchedule() {
               ទំព័រហ្វ៊េសបុកផ្លូវការ
             </Text>
           </TouchableOpacity>
-          <Text style={{ textAlign: "center", color: "white", marginStart: 5 ,fontSize:16}}>
-            និង App​​​ របស់ គ.ប.ប.ព.ប
-          </Text>
         </View>
       </View>
       </View>
@@ -151,7 +149,6 @@ export default function ScreenSchedule(props: any) {
     label: string
     type?: string
   }>({ label: '', loading: false, type: '' });
-  const [isJobSelected, setJobSelected] = React.useState<number>(0);
   const [isLastDayOfMonth, setLastDayOfMonth] = React.useState(31);
   const [isScheduleInfo, setScheduleInfo] = React.useState<{
     dateEnd: string,
@@ -174,7 +171,6 @@ export default function ScreenSchedule(props: any) {
   });
   const schedulesSeasonal = props?.schedulesSeasonal || [];
   const resultProfileSeasonal = props?.resultProfileSeasonal;
-  const jobsSeasonal = props?.jobsSeasonal || [];
   const verifyMemberSeasonal=props?.verifyMemberSeasonal;
   const loadingHome = props?.loadingHome;
   const submitFormSeasonal=props?.submitFormSeasonal;
@@ -236,25 +232,22 @@ export default function ScreenSchedule(props: any) {
             const scheduleSeasonal=schedulesSeasonal?.data?.[0];
             AsyncStorage.setItem(keystores.scheduleSeasonalInfo,JSON.stringify(scheduleSeasonal))
             if (props?.useResultProfileSeasonal) props?.useResultProfileSeasonal({ schedule: scheduleSeasonal?.id })
-            if (props?.useJobsSeasonal) {
-              props?.useJobsSeasonal({
-                folder: scheduleSeasonal?.folder
-              })
-            }
             setTimeout(()=>setRefreshing(false),3000);
           }else{
             setLoading({label:"",loading:true})
-            Alert.alert(
-              `${I18n.t('titlePleaseRequiredLogin')}`,
-              `${I18n.t('messagePleaseRequiredLogin')}`,
-              [
-                {
-                  text: `${I18n.t('login')}`,
-                  onPress: () => NavigationServer.reset(navRoutes.LOGIN),
-                },
-              ],
-              { cancelable: false }
-            ); 
+            setTimeout(async()=>{
+              await Alert.alert(
+                `${I18n.t('titlePleaseRequiredLogin')}`,
+                `${I18n.t('messagePleaseRequiredLoginSWP')}`,
+                [
+                  {
+                    text: `${I18n.t('login')}`,
+                    onPress: () => NavigationServer.reset(navRoutes.LOGIN_SWP),
+                  },
+                ],
+                { cancelable: false }
+              )
+            },2000)
           }
         });
     }else{
@@ -274,7 +267,8 @@ export default function ScreenSchedule(props: any) {
           birthday,
           passport,
           gender,
-          job, subJob, phone, device, image, imagePass,
+          phone, device, image, imagePass,
+          fmlbook,
           place
         } = getValues();
         const input = {
@@ -282,8 +276,7 @@ export default function ScreenSchedule(props: any) {
           name: trimEmptyString(fullName),
           birthday: moment(birthday).format('yyyy-MM-DD'),
           passport:trimEmptyString(passport),
-          job, subJob, phone:trimEmptyString(phone)
-          
+          phone:trimEmptyString(phone),fmlbook
           , device, image, imagePass,
           gender,
           place
@@ -426,39 +419,6 @@ export default function ScreenSchedule(props: any) {
     }
     return years;
   }
-  const handleJobs = (jobs: iJob[]) => {
-    let result: iLabelJob[] = [];
-    if (jobs?.length > 0) {
-      jobs.map((job) => {
-        if (job.isMain === 1) {
-          result.push(
-            { label: job.name, value: `${job.id}` }
-          )
-        }
-      })
-    }
-    return result;
-  }
-  const handleSubJob = (jobs: iJob[], mainId: number) => {
-    let result: iLabelJob[] = [];
-    if (jobs?.length > 0) {
-      jobs.map((job) => {
-        if (job.mainId === mainId) {
-          result.push(
-            { label: job.name, value: `${job.id}` }
-          )
-        }
-      })
-    }
-    return result;
-  }
-  const handleFindJob = (jobs: iJob[], id: number) => {
-    let result = '';
-    if (jobs?.length > 0) {
-      result = jobs.find((job) => job.id === Number(id))?.name || ''
-    }
-    return result;
-  }
   const handleRequest = async () => {
     if (props?.useSchedulesSeasonal) await props?.useSchedulesSeasonal(isScheduleInfo.id);
   };
@@ -473,16 +433,14 @@ export default function ScreenSchedule(props: any) {
     const momentMaxDate = moment(isScheduleInfo.maxBirthday);
     if (formatted.isValid() ) {
       if(isValidPhoneNumber(data?.phone)){
-        if (data?.condition1 && data?.condition2 && data?.condition3 && data?.fullName !== ''
-          && data?.gender !== '' && (data?.job && data?.subJob) > 0 && data?.payment !== '' &&
-          data?.passport !== '' && data?.phone !== '' && data?.image && data?.imagePass
+        if (data?.condition1 && data?.condition2 && data?.condition3 && data?.condition4 && data?.fullName !== ''
+          && data?.gender !== '' &&
+          data?.passport !== '' && data?.phone !== '' && data?.image && data?.imagePass && data?.fmlbook
         ) {
           const isBetween = formatted.isBetween(momentMinDate, momentMaxDate, null, '[]'); // '[]' includes boundaries
             if(isBetween){
               setPreview(true);
               setValue('birthday', formatted);
-              setValue('jobTitle', handleFindJob(Object(jobsSeasonal)?.data, data?.job));
-              setValue('jobSubTitle', handleFindJob(Object(jobsSeasonal)?.data, data?.subJob));
               setValue('schedule', Number(isScheduleInfo.id));
             }else{
               showMessage({
@@ -585,16 +543,15 @@ export default function ScreenSchedule(props: any) {
               onPress={() => {
                 setValue('fullName', 'BIENSOTHEARITH1');
                 setValue('gender', 'Male');
-                setValue('day', '17');
-                setValue('month', '2');
-                setValue('year', '1999');
+                setValue('day', '30');
+                setValue('month', '4');
+                setValue('year', '2024');
                 setValue('condition1', true);
                 setValue('condition2', true);
                 setValue('condition3', true);
+                setValue('condition4', true);
                 setValue('phone', '0705946061');
                 setValue('passport', '0705946061');
-                setValue('job', '2');
-                setValue('subJob', '4');
                 setValue('place', 'kompongcham');
               }
               }>
@@ -681,39 +638,6 @@ export default function ScreenSchedule(props: any) {
                 title={I18n.t("year")}
               />
             </View>
-            <PickerSelect
-              onChange={(value) => {
-                setJobSelected(Number(value));
-                setValue('job', Number(value));
-                setValue('subJob', '');
-              }}
-              style={{
-                marginTop: 10,
-                flex: 0.2,
-              }}
-              name="job"
-              control={control}
-              errors={errors}
-              data={handleJobs(Object(jobsSeasonal)?.data)}
-              rules={{
-                required: true,
-              }}
-              title={I18n.t("selectJob")}
-            />
-            <PickerSelect
-              style={{
-                marginTop: 10,
-                flex: 0.2,
-              }}
-              name="subJob"
-              control={control}
-              errors={errors}
-              data={handleSubJob(Object(jobsSeasonal)?.data, Number(isJobSelected))}
-              rules={{
-                required: true,
-              }}
-              title={I18n.t("selectSubJob")}
-            />
             <TextInput
               phoneNumber
               keyboardType="phone-pad"
@@ -756,22 +680,27 @@ export default function ScreenSchedule(props: any) {
               errors={errors}
               style={{ marginTop: 30 }}
               name="condition1"
-              title={I18n.t("conditionForm1")}
+              title={I18n.t("conditionForm1SWP")}
               control={control}
             />
             <CheckBox
               style={{ marginTop: 5 }}
               name="condition2"
-              title={I18n.t("conditionForm2")}
+              title={I18n.t("conditionForm2SWP")}
               control={control}
             />
             <CheckBox
               style={{ marginTop: 5 }}
               name="condition3"
-              title={I18n.t("conditionForm3")}
+              title={I18n.t("conditionForm3SWP")}
               control={control}
             />
-
+ <CheckBox
+              style={{ marginTop: 5 }}
+              name="condition4"
+              title={I18n.t("conditionForm4SWP")}
+              control={control}
+            />
             <>
               <View
                 style={{
@@ -809,6 +738,27 @@ export default function ScreenSchedule(props: any) {
                 type="IdCard"
                 onChange={(value) => {
                   setValue("imagePass", value);
+                }}
+              />
+            </>
+            <>
+              <View
+                style={{
+                  flexDirection: "row",
+                  marginTop: 30,
+                }}
+              >
+                <Text style={{ fontSize: 16, color: themes.Primary.colorRed }}>*</Text>
+                <Text style={{ fontSize: 16, color: themes.Primary.colorTextBlack }}>
+                  {I18n.t('bookMark')}
+                </Text>
+              </View>
+              <PickerImage
+                control={control}
+                name="fmlbook"
+                type="IdCard"
+                onChange={(value) => {
+                  setValue("fmlbook", value);
                 }}
               />
             </>

@@ -4,7 +4,9 @@ import { navRoutes } from "../navRoutes";
 import ScreenHome from "../../containers/screenHomeContainer";
 import ScreenNotification from "../../containers/screenNotificationContainer";
 import ScreenLogin from "../../containers/screenLoginContainer";
+import ScreenLoginSWP from "../../containers/screenLoginSeasonalContainer";
 import ScreenSignup from "../../containers/screenSignupContainer";
+import ScreenSignupSWP from "../../containers/screenSignupSeasonalContainer";
 import ScreenGuide from "../../containers/screenGuideContainer";
 import ScreenTermOfUsed from "../../containers/screenTermOfUsedContainer";
 import ScreenCard from "../../containers/screenCardScheduleContainer";
@@ -33,8 +35,10 @@ export default function RootMain() {
         component={ScreenNotification}
       />
       <Stack.Screen name={navRoutes.LOGIN} component={ScreenLogin} />
+      <Stack.Screen name={navRoutes.LOGIN_SWP} component={ScreenLoginSWP} />
       <Stack.Screen name={navRoutes.GUIDE} component={ScreenGuide} />
       <Stack.Screen name={navRoutes.SIGNUP} component={ScreenSignup} />
+      <Stack.Screen name={navRoutes.SIGNUP_SWP} component={ScreenSignupSWP} />
       <Stack.Screen name={navRoutes.CARD} component={ScreenCard} />
       <Stack.Screen name={navRoutes.CARD_SEASONAL} component={ScreenCardSeasonal} />
       <Stack.Screen name={navRoutes.FORM} component={ScreenForm} />
