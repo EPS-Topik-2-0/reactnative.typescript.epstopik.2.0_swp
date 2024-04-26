@@ -539,7 +539,7 @@ export default function ScreenSchedule(props: any) {
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
             style={styles.bodyScroll}>
-            <TouchableOpacity
+            {/*<TouchableOpacity
               onPress={() => {
                 setValue('fullName', 'BIENSOTHEARITH1');
                 setValue('gender', 'Male');
@@ -555,8 +555,8 @@ export default function ScreenSchedule(props: any) {
                 setValue('place', 'kompongcham');
               }
               }>
-              <Text>AA</Text>
-            </TouchableOpacity> 
+            <Text>AA</Text>
+            </TouchableOpacity>*/} 
             <TextInput
               inputStyle={{
                 fontSize: 16,
