@@ -27,7 +27,7 @@ import I18n from "../i18n";
 import { useForm } from "react-hook-form";
 import themes from "../themes";
 import moment from "moment";
-import { Months as ArrayMonths } from "../constants";
+import { Months as ArrayMonths,City as ArrayCity } from "../constants";
 import Navigation from "../services/navgationService";
 import { navRoutes } from "../navigation/navRoutes";
 import NavigationServer from "../services/navgationService";
@@ -404,6 +404,9 @@ export default function ScreenSchedule(props: any) {
       label: `${month}`,
     }));
   };
+  const City=()=>{
+    return ArrayCity.map((city:string)=>({label:city,value:city}));
+  }
   const Years = () => {
     const YDateStart = moment(isScheduleInfo.minBirthday).format('YYYY');
     const YDateEnd = moment(isScheduleInfo.maxBirthday).format('YYYY');
@@ -662,7 +665,7 @@ export default function ScreenSchedule(props: any) {
               helperText={Object(errors)?.passport?.message}
               placeholder={I18n.t("idCardOrPassport")}
             />
-             <TextInput
+             {/* <TextInput
               name="place"
               rules={{
                 required: true,
@@ -672,7 +675,22 @@ export default function ScreenSchedule(props: any) {
               control={control}
               helperText={Object(errors)?.place?.message}
               placeholder={I18n.t("address")}
-            />
+            /> */}
+            <PickerSelect
+                style={{
+                  marginTop: 10,
+                  flex: 0.25,
+                  marginEnd: 5,
+                }}
+                name="place"
+                control={control}
+                errors={errors}
+                data={City()}
+                rules={{
+                  required: true,
+                }}
+                title={I18n.t("address")}
+              />
             <CheckBox
               rules={{
                 required: true,
