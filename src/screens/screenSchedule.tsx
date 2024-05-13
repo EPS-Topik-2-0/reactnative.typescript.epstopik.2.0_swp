@@ -1480,7 +1480,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
   },
   imageLogo: {
-    flex: 1,
+    flex: .8,
     height: "100%",
     marginEnd: 10,
     marginStart: 10,

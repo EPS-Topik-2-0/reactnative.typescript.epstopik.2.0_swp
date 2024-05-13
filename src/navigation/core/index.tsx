@@ -9,6 +9,7 @@ import ScreenSignupSWP from "../../containers/screenSignupSeasonalContainer";
 import ScreenGuide from "../../containers/screenGuideContainer";
 import ScreenTermOfUsed from "../../containers/screenTermOfUsedContainer";
 import ScreenCard from "../../containers/screenCardScheduleContainer";
+import ScreenEBook from "../../containers/screenEBookContainer";
 
 export default function RootCore() {
   const Stack = createNativeStackNavigator();
@@ -26,6 +27,7 @@ export default function RootCore() {
       <Stack.Screen name={navRoutes.LOGIN} component={ScreenLogin} />
       <Stack.Screen name={navRoutes.LOGIN_SWP} component={ScreenLoginSWP} />
       <Stack.Screen name={navRoutes.GUIDE} component={ScreenGuide} />
+      <Stack.Screen name={navRoutes.EBOOK} component={ScreenEBook} />
       <Stack.Screen name={navRoutes.TERMOfUSE} component={ScreenTermOfUsed} />
       <Stack.Screen name={navRoutes.SIGNUP} component={ScreenSignup} />
       <Stack.Screen name={navRoutes.SIGNUP_SWP} component={ScreenSignupSWP} />

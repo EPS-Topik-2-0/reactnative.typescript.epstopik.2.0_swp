@@ -19,6 +19,7 @@ import ScreenAboutUs from "../../containers/screenAboutUsContainer";
 import ScreenViaBakong from "../../containers/screenViaBakongContainer";
 import ScreenViaWing from "../../containers/screenViaWingContainer";
 import ScreenYoutube from "../../containers/screenYoutubeContainer";
+import ScreenEBook from "../../containers/screenEBookContainer";
 
 export default function RootMain() {
   const Stack = createNativeStackNavigator();
@@ -37,6 +38,7 @@ export default function RootMain() {
       <Stack.Screen name={navRoutes.LOGIN} component={ScreenLogin} />
       <Stack.Screen name={navRoutes.LOGIN_SWP} component={ScreenLoginSWP} />
       <Stack.Screen name={navRoutes.GUIDE} component={ScreenGuide} />
+      <Stack.Screen name={navRoutes.EBOOK} component={ScreenEBook} />
       <Stack.Screen name={navRoutes.SIGNUP} component={ScreenSignup} />
       <Stack.Screen name={navRoutes.SIGNUP_SWP} component={ScreenSignupSWP} />
       <Stack.Screen name={navRoutes.CARD} component={ScreenCard} />

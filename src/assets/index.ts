@@ -44,3 +44,4 @@ export { default as IcNotificationWhiteSmall } from "./icNotificationWhiteSmall.
 export { default as IcMenusSmall } from "./icMenusSmall.svg";
 export { default as ImUserOld } from "./user.png";
 export { default as IcFormSWPA } from "./agriculture.png";
+export { default as IcPDF } from "./icPDF.svg";

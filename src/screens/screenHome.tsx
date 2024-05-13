@@ -18,7 +18,8 @@ import {
   IcQuestionWhite,
   IcContact,
   IcAboutUs,
-  IcFormSWPA
+  IcFormSWPA,
+  IcPDF
 } from "../assets";
 import I18n from "../i18n";
 import themes from "../themes";
@@ -149,10 +150,18 @@ export default function ScreenHome(props: any) {
           <TouchableOpacity 
           onPress={()=>NavigationService.navigate(navRoutes.GUIDE)}
           style={styles.gridItem}>
-          <View style={styles.styBtn}>
-            <IcQuestionWhite width={85} height={85}/>
-          </View>
-          <Text style={styles.txtLabel} numberOfLines={1}>{`${I18n.t('desc')}`}</Text>
+            <View style={styles.styBtn}>
+              <IcQuestionWhite width={85} height={85}/>
+            </View>
+            <Text style={styles.txtLabel} numberOfLines={1}>{`${I18n.t('desc')}`}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+          onPress={()=>NavigationService.navigate(navRoutes.EBOOK)}
+          style={styles.gridItem}>
+            <View style={styles.styBtn}>
+              <IcPDF width={75} height={75}/>
+            </View>
+            <Text style={styles.txtLabel} numberOfLines={1}>{`${I18n.t('document')}`}</Text>
           </TouchableOpacity>
           <TouchableOpacity 
           onPress={()=>NavigationService.navigate(navRoutes.TERMOfUSE)}
