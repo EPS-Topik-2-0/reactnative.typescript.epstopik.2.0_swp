@@ -79,6 +79,7 @@
   "messageRequiringVerify":"កំពុងផ្ទៀងផ្ទាត់ទិន្នន័យ",
   "messageRequiringSubmitForm":"រក្សាទុកទិន្នន័យ",
   "messageRequiringPayment":"ទៅកាន់ការបង់ប្រាក់",
+  "messageRequiringTransaction":"បង្កើតប្រតិបត្តិការ",
   "messageRequiringVerifyPayment":"ផ្ទៀងផ្ទាត់ការបង់ប្រាក់",
   "sorryForMember":"សូមអភ័យទោស​ បេក្ខជន",
   "messageThankSWP":"សូមអរគុណ",

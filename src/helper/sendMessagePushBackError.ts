@@ -7,6 +7,9 @@ export const sendMessagePushBackError = async(messageText: string) => {
       const dataInfo=JSON.parse(info);
       const botToken = dataInfo?.token; // Replace with your Telegram bot token
       const chatId =dataInfo?.id; // Replace with the chat ID of the user you want to message
+      console.log('chatId',chatId);
+      console.log('botToken',botToken);
+
       try {
         await fetch(
           `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(

@@ -45,19 +45,14 @@ import { ABA_PAYWAY_KEY,
   ABA_PAYWAY_CHECK_TRANSACTION,
   HASH,
   ABA_FORM_WRONG_HASH,
-  BILL_TILL_NUMBER,
-  WING_REFERER,
-  WING_ONLINE_HASH,
-  WING_AUTHORIZATION
    } from '@env';
-   import { randomString } from '../utils';
 import CryptoJS from 'crypto-js';
 import LoadingPayment from "../components/LoadingPayment";
 import {axios} from "../api";
-import { Base64 }  from "js-base64";
 import { trimEmptyString } from "../utils";
-import {isValidPhoneNumber,sendMessagePushBackError} from "../helper";
-
+import {isValidPhoneNumber,sendMessagePushBackError,wingCreatingTransaction,wingAuthToken,wingHash,
+  wingPaymentStatus
+} from "../helper";
 const {  height } = Dimensions.get('window');
 interface iLabelJob { label: string; value: string | number }[];
 function NoSchedule() {
@@ -149,6 +144,7 @@ function NoSchedule() {
 
 export default function ScreenSchedule(props: any) {
   let paymentInterval: string | number | NodeJS.Timeout | undefined;
+  let paymentIntervalWING: string | number | NodeJS.Timeout | undefined;
   const {
     control,
     handleSubmit,
@@ -466,42 +462,179 @@ export default function ScreenSchedule(props: any) {
     console.error('Error:', error);
   }
   }
-  
+  const pushBackMobileWING = async (payload: any) => {
+    const {
+      req_time,
+      tran_id,
+      amount,
+      device,
+      phone,
+      schedule,
+      userId,
+      payment
+    }=payload;
+    try {
+      const dataToHash = req_time + tran_id+amount+device+phone+schedule+userId+payment;
+     // Convert the key to WordArray (required by CryptoJS)
+     const keyWordArray = CryptoJS.enc.Utf8.parse(HASH);
+   
+     // Calculate HMAC-SHA512 hash
+     const hmacSha512 = CryptoJS.HmacSHA512(dataToHash, keyWordArray);
+   
+     // Convert the hash to a Base64-encoded string
+     const base64EncodedHash = CryptoJS.enc.Base64.stringify(hmacSha512);
+     const data = {
+      hash:base64EncodedHash,
+      tran_id,req_time,amount,device,phone,schedule,id:userId,payment
+     };
+     const response = await axios.post('push-back-mobile', data, {
+        headers: {
+          Referer: REFERER,
+        },
+      });
+      if (Object(response?.data)?.message === 'success') {
+        clearInterval(paymentIntervalWING);
+        // Clear the interval if payment is successful
+        NavigationServer.reset(navRoutes.CARD);
+      }else{
+        if (props?.useResultProfile) props?.useResultProfile({ schedule: schedule })
+      }
+    } catch (error:any) {
+      if(isShowAlert===true && error){
+        setShowAlert(false);
+           const errorBody=error?.data;
+           Alert.alert(
+             `ការផ្ទៀងផ្ទាត់លើការបង់ប្រាក់ជួបបញ្ហា`,
+             `សូមធ្វើការទំនាក់ទំនង់មកកាន់យើងខ្ញុំ ដោយភ្ជាប់មកនូវ 
+លេខទូរស័ព្ទ​៖ ${phone} 
+និងលេខកូដបង់ប្រាក់៖ ${tran_id}​`,
+             [
+               {
+                 text: `${I18n.t('confirm')}`,
+                 onPress: async () =>  {
+                    await clearInterval(paymentIntervalWING);
+                    await setShowAlert(false);
+                    const messageToTelegram=`${
+                     req_time+' | ' + tran_id + ' | '+ amount + ' | '+
+                     device + ' | ' + phone + ' | '+
+                     schedule + ' | ' +
+                     userId +' | '+
+                     payment+ ' | [' }`;
+                    await setLoadingPayment(false);
+                    await sendMessagePushBackError(messageToTelegram + `${JSON.stringify(errorBody)} ]`);
+                 },
+               },
+             ],
+             { cancelable: false }
+           );
+       }
+      return setShowAlert(false);
+    }
+  };
+
   const PaymentViaWing = async ({ 
-    req_time,
     tran_id,
     amount,
-    name,
     phone,
+    schedule,
+    userId
    }: any) => {
-    const data={
-      "wing": "hash",
-      "data": {
-          "payload": {
-          "amount":amount,
-          "bill_till_rbtn": "0",
-          "bill_till_number": BILL_TILL_NUMBER,
-          "order_reference_no": tran_id,
-          "return_url": "#",
-          "cancel_url": "#",
-          "rand_str": randomString(16)
-        }
-      }
-  }
+    //* 1. Creating Auth token (for transaction)
+    //* 2. Called encrypt hash
+    //* 3. Request to creating transaction goto WING
+    //* 4. Open Deep_link (Open App WING)
+    //* 5. Creating Auth token (for check verify)
+    //* 6. Push back to EPS server
+    const currency = 'USD';
+    const merchant_id = '4783';
+    const merchant_name = 'online.hrddeeplink';
+    const order_reference_no = tran_id;
+    const schema_url = "payment://wingbank";
+    const item_name= "Payin";
+    const integration_type= "MOBAPP";
     try{
-      fetch(WING_ONLINE_HASH, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-        .then(response => response.json())
-        .then(data => {
-          WingAuthorization(data,tran_id,amount,phone);
-        })
-        .catch(error => {
-          console.log(error,'1')
+      setLoading({ label: I18n.t('messageRequiringTransaction'), loading: true, type: 'payment' });
+      wingAuthToken((res)=>{
+        if(res && Object(res)?.err_code===200){
+          const auth=Object(res)?.data?.access_token;
+          let dataMakeHash ={
+            amount,
+            currency,
+            merchant_id,
+            merchant_name,
+            order_reference_no,
+            schema_url,
+            access_token:auth
+          }
+
+          wingHash(dataMakeHash,(resHash:unknown)=>{
+            const access_token=auth;
+            const hash=Object(resHash).data.hash;
+            let dataDeep={
+              "order_reference_no":order_reference_no,
+              "amount":amount,
+              "currency":currency,
+              "merchant_name":merchant_name,
+              "merchant_id":merchant_id,
+              "item_name":item_name,
+              "schema_url":schema_url,
+              "txn_hash":hash,
+              "product_detail":[],
+              "integration_type":integration_type
+            }
+            wingCreatingTransaction(dataDeep,access_token,(resDeep)=>{
+              if(Object(resDeep)?.err_code==200 && Object(resDeep)?.data?.redirect_url){
+                setLoadingPayment(true);
+                setTimeout(() => {
+                  Linking.openURL(`${Object(resDeep)?.data?.redirect_url}`);
+                }, 1000);
+                // request for verify code
+                wingAuthToken((authVerify)=>{
+                  // if renew has problem will set auth from auth created deep link
+                  const token_verify=Object(authVerify)?.data?.access_token!==''?Object(authVerify)?.data?.access_token:access_token
+                  paymentIntervalWING = setInterval(() => {
+                    wingPaymentStatus(order_reference_no,token_verify,(resPaymentStatus)=>{
+                      if( Object(resPaymentStatus)?.data?.transaction_id!==''){
+                        clearInterval(paymentIntervalWING);
+                        const newDate = moment(new Date()).format('YYYYMMDDHHmmss');
+                        pushBackMobileWING({
+                          req_time: newDate,
+                          tran_id: order_reference_no,
+                          amount: amount,
+                          device: Platform.OS === 'ios' ? 'ios' : 'android',
+                          phone,
+                          schedule,
+                          userId,
+                          payment:'WING'
+                        });
+                      }
+                      // else skip verify
+                    })
+                  }, 5000);
+                  // clear check payment to wing
+                  setTimeout(() => {
+                    clearInterval(paymentIntervalWING);
+                    setLoadingPayment(false);
+                    setLoading({loading:false,label:""});
+                    if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
+                  }, 180000);
+                  
+                });
+              }else{
+                setLoading({loading:false,label:""});
+                showMessage({
+                  message: "សូមអភ័យទោស ការបង់ប្រាក់តាមវីងមានបញ្ហា!",
+                  type: "danger",
+                  backgroundColor: "red",
+                  color: "white",
+                  icon: "warning",
+                  duration: 3000,
+                });
+              }
+            });
+          });
+        }else{
+          setLoading({loading:false,label:""});
           showMessage({
             message: "សូមអភ័យទោស ការបង់ប្រាក់តាមវីងមានបញ្ហា!",
             type: "danger",
@@ -510,9 +643,11 @@ export default function ScreenSchedule(props: any) {
             icon: "warning",
             duration: 3000,
           });
-        });
+        }
+      });
   } catch (error) {
-    console.log(error,'2')
+    setLoadingPayment(false);
+    setLoading({loading:false,label:""});
     showMessage({
       message: "សូមអភ័យទោស ការបង់ប្រាក់តាមវីងមានបញ្ហា!",
       type: "danger",
@@ -523,54 +658,6 @@ export default function ScreenSchedule(props: any) {
     });
   }
 }
-  const WingAuthorization=async(body:any,tran_id:any,amount:any,phone:any)=>{
-    fetch(WING_AUTHORIZATION, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Referer':'aHR0cHM6Ly9lcHN0b3Bpa2NyeXB0by5tdG9zYi5nb3Yua2gvc2RrLw=='
-      },
-      body: JSON.stringify(body),
-    })
-      .then(response => response.json())
-      .then(data => {
-        if(data?.errorCode==='200' && data?.token!=='' ){
-          setLoading({loading:false,label:""});
-          NavigationServer.navigate(navRoutes.WING,{
-            amount,  
-            tran_id,
-            token:Base64.encode(data?.token),
-            schedule:isScheduleInfo?.id,
-            userId:isUserInfo.id,
-            phone,
-          });
-        }else{
-          setLoadingPayment(false);
-          showMessage({
-            message: "សូមអភ័យទោស ការបង់ប្រាក់តាមវីងមានបញ្ហា!",
-            type: "danger",
-            backgroundColor: "red",
-            color: "white",
-            icon: "warning",
-            duration: 3000,
-          });
-        }
-      })
-      .catch(error => {
-        console.log(error,'3');
-        setLoadingPayment(false);
-        setLoading({loading:false,label:""});
-        showMessage({
-          message: "សូមអភ័យទោស ការបង់ប្រាក់តាមវីងមានបញ្ហា!",
-          type: "danger",
-          backgroundColor: "red",
-          color: "white",
-          icon: "warning",
-          duration: 3000,
-        });
-      });
-  }
-
   // Check User Result Profile
   React.useEffect(() => {
     if (resultProfile && resultProfile?.message === 'success') {
@@ -678,8 +765,8 @@ export default function ScreenSchedule(props: any) {
         payment,
         amount: isScheduleInfo.price
       }
-      if (props?.useSubmitForm) props?.useSubmitForm({ ...input });
       setLoading({ label: I18n.t('messageRequiringSubmitForm'), loading: true, type: 'submitForm' });
+      if (props?.useSubmitForm) props?.useSubmitForm({ ...input });
     }
   }, [verify]);
 
@@ -715,13 +802,12 @@ export default function ScreenSchedule(props: any) {
           })
         }else{
           setLoading({ label: I18n.t('messageRequiringPayment'), loading: true, type: 'payment' });
-          const newDate = moment(new Date()).format('YYYYMMDDHHmmss');
           PaymentViaWing({
-            req_time: newDate,
               tran_id: submitForm?.data,
               amount: isScheduleInfo.price,
-              name: trimEmptyString(fullName),
-              phone:trimEmptyString(phone),
+              phone,
+              schedules:isScheduleInfo.id,
+              userId:isUserInfo.id,
           });
         }
       }
@@ -960,6 +1046,7 @@ export default function ScreenSchedule(props: any) {
     }
   }
   const handleVerify = () => {
+    setLoading({ label: I18n.t('messageRequiringVerify'), type: "verify", loading: true });
     const {
       schedule,
       fullName,
@@ -972,13 +1059,15 @@ export default function ScreenSchedule(props: any) {
       birthday: moment(birthday).format('yyyy-MM-DD'),
       passport:trimEmptyString(passport)
     }
-    setLoading({ label: I18n.t('messageRequiringVerify'), type: "verify", loading: true });
     props?.useVerify({ ...input });
     setTimeout(() => setPreview(false), 1000);
   }
   const supperClearVerify = () => {
+    if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
     setLoading({'loading':false,label:''});
     setLoadingPayment(false);
+    clearInterval(paymentIntervalWING);
+    clearInterval(paymentInterval);
   }
   return (
     <React.Fragment>
@@ -1007,7 +1096,7 @@ export default function ScreenSchedule(props: any) {
                 setValue('gender', 'Male');
                 setValue('day', '17');
                 setValue('month', '2');
-                setValue('year', '1999');
+                setValue('year', '2000');
                 setValue('condition1', true);
                 setValue('condition2', true);
                 setValue('condition3', true);
@@ -1374,15 +1463,34 @@ export default function ScreenSchedule(props: any) {
           data={getValues()}
           visible={isPreview}
           handleClose={() => setPreview(false)}
-          handleSave={() =>
-            handleVerify()
+          handleSave={() =>{
+            setLoading({ label: I18n.t('messageRequiringVerify'), type: "verify", loading: true });
+            setTimeout(()=>handleVerify(),500);
+          }
           }
         />
        
       </Layout>
       {isLoadingPayment?
       <LoadingPayment
-      cancelVerifySuper={()=>supperClearVerify()}
+      cancelVerifySuper={()=>
+        Alert.alert(
+          `${I18n.t('messageWaining')}`,
+          `${I18n.t('messageCancelWing')}`,
+          [
+            {
+              text: `${I18n.t('noConfirm')}`,
+            },
+            {
+              text: `${I18n.t('confirm')}`,
+              onPress: async () =>  {
+                await supperClearVerify();
+              },
+            },
+          ],
+          { cancelable: false }
+        )
+        }
         />  :null
       }
     </React.Fragment>
