@@ -37,7 +37,6 @@ function* getDeepLink(payload:any) {
     data.append('req_time', req_time);
     data.append('merchant_id',ABA_PAYWAY_MERCHANT_ID);
     data.append('payment_option','abapay_deeplink');
-    console.log(data)
     axios.post(ABA_API_PURCHASE, data, {
       headers: {
         Referer: REFERER,
@@ -51,8 +50,6 @@ function* getDeepLink(payload:any) {
         console.log('error',error)
       });
   } catch (e: any) {
-    console.log(e)
-
     const parseError: SagaReturnType<any> = yield JSON.parse(JSON.stringify(e));
     const message: SagaReturnType<any> =
       Object(parseError)?.data || Object(parseError)?.response;

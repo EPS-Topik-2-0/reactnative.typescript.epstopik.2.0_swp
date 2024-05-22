@@ -10,8 +10,22 @@ import DrawerMenu from "../components/SideDrawer";
 import { DataProvider } from "./dataContext";
 const Drawer = createDrawerNavigator();
 function Navigator() {
+  const linking = {
+    prefixes: ['epstopikapp://'],
+    config: {
+      screens: {
+        [navRoutes.START_UP]: 'startup',
+        [navRoutes.MAIN]: {
+          path:'main',
+          screens:{ [navRoutes.FORM]: 'form'}
+        },
+        [navRoutes.CORE]: 'core',
+      },
+    },
+  };
   return (
     <NavigationContainer
+      linking={linking}
       ref={(navigatorRef) =>
         NavigationService.setTopLevelNavigator(navigatorRef)
       }

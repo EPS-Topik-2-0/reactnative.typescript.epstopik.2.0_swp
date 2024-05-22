@@ -142,7 +142,6 @@ function* payment(payload: any) {
       },
     });
   } catch (error) {
-    console.log(error)
     const parseError: SagaReturnType<any> = yield JSON.parse(JSON.stringify(error));
     const message: SagaReturnType<any> =
       Object(parseError)?.data || Object(parseError)?.response;
@@ -192,7 +191,6 @@ function* verifyPayment(payload: any) {
     const parseError: SagaReturnType<any> = yield JSON.parse(JSON.stringify(error));
     const message: SagaReturnType<any> =
       Object(parseError)?.data || Object(parseError)?.response;
-    console.log('ERROR ABA',error)
     yield put({
       type: VERIFY_PAYMENT_FAILURE,
       payload: { errorVerifyPayment: message },
@@ -230,7 +228,6 @@ function* pushBackMobile(payload: any) {
         Referer: REFERER
        },
  });
-  console.log('hash',base64EncodedHash)
     yield put({
       type: PUSH_BACK_MOBILE_SUCCESS,
       payload: {

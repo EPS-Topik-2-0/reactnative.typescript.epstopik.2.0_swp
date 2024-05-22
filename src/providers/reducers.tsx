@@ -6,6 +6,8 @@ import scheduleReducer from "../modules/schedule/schedule.reducers";
 import paymentReducer from "../modules/payment/payment.reducers";
 import termOfUseReducer from "../modules/termOfUse/termOfUse.reducers";
 import scheduleSeasonalReducer from "../modules/scheduleSeasonal/scheduleSeasonal.reducers";
+import ebookReducer from "../modules/ebooks/ebooks.reducers";
+
 
 export default {
   app: appReducer,
@@ -15,5 +17,6 @@ export default {
   schedule:scheduleReducer,
   payment:paymentReducer,
   termOfUse:termOfUseReducer,
-  scheduleSeasonal:scheduleSeasonalReducer
+  scheduleSeasonal:scheduleSeasonalReducer,
+  ebook:ebookReducer
 };

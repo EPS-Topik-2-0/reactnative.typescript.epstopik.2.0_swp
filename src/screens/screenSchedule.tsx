@@ -51,7 +51,8 @@ import LoadingPayment from "../components/LoadingPayment";
 import {axios} from "../api";
 import { trimEmptyString } from "../utils";
 import {isValidPhoneNumber,sendMessagePushBackError,wingCreatingTransaction,wingAuthToken,wingHash,
-  wingPaymentStatus
+  wingPaymentStatus,
+  wingGotoStore
 } from "../helper";
 const {  height } = Dimensions.get('window');
 interface iLabelJob { label: string; value: string | number }[];
@@ -531,7 +532,7 @@ export default function ScreenSchedule(props: any) {
       return setShowAlert(false);
     }
   };
-
+  
   const PaymentViaWing = async ({ 
     tran_id,
     amount,
@@ -549,7 +550,7 @@ export default function ScreenSchedule(props: any) {
     const merchant_id = '4783';
     const merchant_name = 'online.hrddeeplink';
     const order_reference_no = tran_id;
-    const schema_url = "payment://wingbank";
+    const schema_url = "epstopikapp://main/form";
     const item_name= "Payin";
     const integration_type= "MOBAPP";
     try{
@@ -566,7 +567,6 @@ export default function ScreenSchedule(props: any) {
             schema_url,
             access_token:auth
           }
-
           wingHash(dataMakeHash,(resHash:unknown)=>{
             const access_token=auth;
             const hash=Object(resHash).data.hash;
@@ -585,9 +585,19 @@ export default function ScreenSchedule(props: any) {
             wingCreatingTransaction(dataDeep,access_token,(resDeep)=>{
               if(Object(resDeep)?.err_code==200 && Object(resDeep)?.data?.redirect_url){
                 setLoadingPayment(true);
-                setTimeout(() => {
-                  Linking.openURL(`${Object(resDeep)?.data?.redirect_url}`);
-                }, 1000);
+                const url=`${Object(resDeep)?.data?.redirect_url}`;
+                setTimeout(async() => {
+                  try{
+                    const supported = await Linking.canOpenURL(url);
+                    if (supported) {
+                      Linking.openURL(url);
+                    } else {
+                      wingGotoStore();
+                    }
+                  }catch(e){
+                    wingGotoStore();
+                  }
+                }, 500);
                 // request for verify code
                 wingAuthToken((authVerify)=>{
                   // if renew has problem will set auth from auth created deep link
@@ -1090,7 +1100,7 @@ export default function ScreenSchedule(props: any) {
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
             style={styles.bodyScroll}>
-            {/* <TouchableOpacity
+            <TouchableOpacity
               onPress={() => {
                 setValue('fullName', 'BIENSOTHEARITH');
                 setValue('gender', 'Male');
@@ -1106,8 +1116,8 @@ export default function ScreenSchedule(props: any) {
                 setValue('subJob', '4');
               }
               }>
-              <Text>AA</Text>
-            </TouchableOpacity>  */}
+              <Text style={{color:'red'}}>AA</Text>
+            </TouchableOpacity> 
             <TextInput
               inputStyle={{
                 fontSize: 16,
@@ -1321,7 +1331,7 @@ export default function ScreenSchedule(props: any) {
               <Text style={{ fontSize: 14, color: themes.Primary.colorGrey }}>
                 {I18n.t('labelRequiredPayment')}
                 <Text style={{ fontSize: 14, color: themes.Primary.colorTextBlack, fontWeight: "bold" }}>
-                  {`  ` + `${Number(isScheduleInfo?.price) > 0 ? Number(isScheduleInfo.price) : 28}` + `  `}
+                  {`  ` + `${Number(isScheduleInfo?.price) > 0 ? Number(isScheduleInfo.price).toFixed(2) : Number(28).toFixed(2)}` + `  `}
                 </Text>
                 {I18n.t('labelRequiredPayment2')}
               </Text>

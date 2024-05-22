@@ -1,11 +1,11 @@
 import { connect } from "react-redux";
 import ScreenView from "../screens/screenEBook";
-import {  videos } from "../modules/termOfUse";
+import {  ebooks } from "../modules/ebooks";
 const mapStateToProps = (state: any) => ({ 
-   videos:state?.termOfUse?.videos,
-   loadingTermOfUse: state?.termOfUse?.loading });
+   ebooks:state?.ebook?.ebooks,
+   loadingEbooks: state?.ebook?.loading });
 const mapDispatchToProps = {
-   useVideos:videos
+   useEbooks:ebooks
 };
 let Screen = connect(mapStateToProps, mapDispatchToProps)(ScreenView);
 export default Screen;

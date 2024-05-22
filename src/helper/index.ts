@@ -4,3 +4,4 @@ export * from './wingAuthToken';
 export * from './wingHash';
 export * from './wingCreatingTransaction';
 export * from './wingPaymentStatus';
+export * from './wingGotoStore';

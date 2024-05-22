@@ -8,7 +8,6 @@ import {
   View,
   Image,
   RefreshControl,
-  Alert,
   Linking
 } from "react-native";
 import {
@@ -21,20 +20,32 @@ import {
 import I18n from "../i18n";
 import themes from "../themes";
 import NavigationService from "../services/navgationService";
-import { navRoutes } from "../navigation/navRoutes";
-import axios from "axios";
-import qs from 'qs';
-import CryptoJS from 'crypto-js';
+import {API_URL} from '../api/config';
+import { showMessage } from "react-native-flash-message";
 
 function LinkVideo({data}:any) {
   return (
     <TouchableOpacity
-    onPress={()=>NavigationService.navigate(navRoutes.YOUTUBE,{link:data?.link})}
+    onPress={async()=>{
+      const url=data?.link || ''
+      try{
+        Linking.openURL(url);
+      }catch(e){
+        showMessage({
+          message: "ឯកសារមានបញ្ហាមិនអាចបើកបានទេ",
+          type: "danger",
+          backgroundColor: themes.Primary.colorRed100,
+          color: "white",
+          icon: "warning",
+          duration: 7000,
+        });
+      }}
+    }
     style={{ marginBottom: 15 }}>
       <View
         style={[
           {
-            height: 280,
+            height: 220,
             borderRadius: 10,
             shadowColor: themes.Primary.colorGrey,
             shadowOffset: {
@@ -59,7 +70,7 @@ function LinkVideo({data}:any) {
         >
           <IcGuide width={20} height={20} />
           <Text
-            numberOfLines={1}
+            numberOfLines={3}
             style={{
               fontSize: 14,
               marginLeft: 10,
@@ -83,36 +94,21 @@ function LinkVideo({data}:any) {
             !data?.alias || data?.alias ===''?
             <ThumbnailLoading />:
             <Image
-              source={{uri:`${data?.alias}`}}
+              source={{uri:`${API_URL}/image/ebooks/${data?.alias}`}}
               resizeMode="contain" style={{ height:"100%",width:'100%' }}
                /> 
           }
-        </View>
-        <View
-          style={{
-            flex: 0.2,
-            marginTop: 10,
-            flexDirection: "row",
-          }}
-        >
-          <Text
-            numberOfLines={2}
-            style={{ fontSize: 12, fontFamily: themes.FontFamily.Hanuman }}
-          >
-           {data?.desc}
-          </Text>
         </View>
       </View>
     </TouchableOpacity>
   );
 }
 
-export default function ScreenGuide(props: any) {
-  const videos = props?.videos;
+export default function ScreenEbook(props: any) {
   const [refreshing, setRefreshing] = React.useState(false);
-  
+  const ebooks = props?.ebooks;
   const handleRequest = async () => {
-    if (props?.useVideos) await props?.useVideos();
+    if (props?.useEbooks) await props?.useEbooks();
   };
   React.useEffect(() => {
     handleRequest();
@@ -124,164 +120,7 @@ export default function ScreenGuide(props: any) {
       setRefreshing(false);
     }, 2000);
   };
-  const handleAuthToken=async(callback:(res:unknown)=>void)=>{
-    // 1. required auth token
-    const data = {
-      username: "online.hrddeeplink",
-      password: "914bade01fd32493a0f2efc583e1a5f6",
-      client_id: "third_party",
-      client_secret: "16681c9ff419d8ecc7cfe479eb02a7a",
-      grant_type: "password"
-    };
-    const URL_WING_DEEP_LINK = "https://ir.wingmoney.com:9443/RestEngine";
-    try {
-      const formData = qs.stringify(data);
-      axios.post(`${URL_WING_DEEP_LINK}/oauth/token`, formData, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      })
-      .then(response => {
-        return callback({
-          err_code:200,
-          data:response.data
-        });
-      })
-      .catch(error => {
-        return callback({
-          err_code:400,
-          data:error
-        });
-      });
-    } catch (er) {
-      return callback({
-        err_code:400,
-        data:er
-      })
-    }
-  }
-  const handleEncryptHash=(dataMake:unknown,callback:(res:unknown)=>void)=>{
-    try {
-      const aToken = Object(dataMake).access_token;
-      const payloadData = dataMake;
-      const amount = parseFloat(Object(payloadData)?.amount).toFixed(2);
-      const currency = Object(payloadData)?.currency;
-      const merchant_id = Object(payloadData)?.merchant_id;
-      const order_reference_no = Object(payloadData)?.order_reference_no;
-      const schema_url = Object(payloadData)?.schema_url;
-      const token = aToken;
-      const password = `${token}`.replace(/-/g, "");
-      const SALT = "WINGBANK";
-  
-      // Create a key using PBKDF2
-      const key = CryptoJS.PBKDF2(password, SALT, { keySize: 32 / 4, iterations: 65536, hasher: CryptoJS.algo.SHA256 });
-  
-      const strdt_org = `${amount}#${currency}#${merchant_id}#${order_reference_no}#${schema_url}`;
-      // Step 1: Base64 encoding
-      const step1Base64 = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(strdt_org));
-      // Step 2: AES encryption
-      const payloadEncrypted = CryptoJS.AES.encrypt(step1Base64, key, { iv: CryptoJS.enc.Hex.parse('00000000000000000000000000000000') }).toString();
-      // Step 3: Base64 encoding
-      const step3Base64 = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(payloadEncrypted));
-      // Step 4: SHA256 hash
-      const stringHash = CryptoJS.SHA256(step3Base64).toString(CryptoJS.enc.Hex).toUpperCase();
-  
-      const requestData = {
-        username: merchant_id,
-        hash: stringHash,
-        sandbox: strdt_org,
-        token: password,
-        payloadData: payloadData
-      };
-  
-      return callback({ data: requestData, err_code: 200 });
-    } catch (error) {
-      return callback({ data: error, err_code: 400 });
-    }
-  }
-  const handleCreatingDeepLink=(data:unknown,token:unknown,callback:(res:unknown)=>void)=> {
-    try {
-    const URL_WING_DEEP_LINK="https://ir.wingmoney.com:9443/RestEngine/api/v4/generatedeeplink"
-    axios.post(`${URL_WING_DEEP_LINK}`, data, {
-      headers: {
-        "Authorization": `Bearer ${token}`
-      }
-    })
-    .then(response => {
-      return callback({
-        err_code:200,
-        data:response.data
-      })
-    })
-    .catch(error => {
-      return callback({
-        err_code:400,
-        data:error
-      })
-    });
-    } catch (er) {
-      return callback({
-        err_code:400,
-        data:er
-      })
-    }
-  }
-  const handleWING=()=>{
-    const amount = 0.01;
-    const currency = 'USD';
-    const merchant_id = '4783';
-    const merchant_name = 'HRD-Korea';
-    const order_reference_no = "test00001";
-    const schema_url = "payment://wingbank";
-    const item_name= "Payin";
-    const integration_type= "MOBAPP";
-    console.log('click')
-    handleAuthToken((res)=>{
-      console.log('auth',Object(res)?.data?.access_token)
-      if(res && Object(res)?.err_code===200){
-        const auth=Object(res)?.data?.access_token;
-        let dataMakeHash ={
-          amount,
-          currency,
-          merchant_id,
-          merchant_name,
-          order_reference_no,
-          schema_url,
-          access_token:auth
-        }
-        handleEncryptHash(dataMakeHash,(resHash:unknown)=>{
-          console.log('hash',Object(resHash).data.hash)
-          const access_token=auth;
-          const hash=Object(resHash).data.hash;
-          let dataDeep={
-              "order_reference_no":order_reference_no,
-              "amount":amount,
-              "currency":currency,
-              "merchant_name":merchant_name,
-              "merchant_id":merchant_id,
-              "item_name":item_name,
-              "schema_url":schema_url,
-              "txn_hash":hash,
-              "product_detail":[],
-              "integration_type":integration_type
-          }
-          handleCreatingDeepLink(dataDeep,access_token,(resDeep:unknown)=>{
-            console.log('redirect_url',Object(resDeep)?.data)
-            if(resDeep && Object(resDeep)?.err_code===200){
-              console.log(`${Linking.canOpenURL(`${Object(resDeep)?.data?.redirect_url}`)}`)
-              Linking.openURL(`${Object(resDeep)?.data?.redirect_url}`);
-            }else{
-              Alert.alert("Invalid DeepLink")
-            }
-          })
-        })
-      }else{
-        console.log("Invalid WING Auth");
-        Alert.alert("Invalid WING Auth");
-
-      }
-    })
-  }
+ 
   return (
     <Layout
       centerTitle={I18n.t("document")}
@@ -295,15 +134,15 @@ export default function ScreenGuide(props: any) {
         }
         style={styles.bodyScroll}
       >
-        {/* {videos?.message === "success" &&
-        Array.isArray(videos?.data)
-          ? videos?.data?.map((data:any) => (
-          <LinkVideo key={data.id} data={data} />
-        )):null
-      } */}
-        <TouchableOpacity onPress={()=>handleWING()}>
-          <Text>WING PAY AA</Text>
-        </TouchableOpacity>
+      {ebooks?.message === "success" &&
+        Array.isArray(ebooks?.data)
+          ? ebooks?.data?.map((one: any, i: number) => (
+              <LinkVideo
+                data={one}
+                key={i}
+              />
+            ))
+          : null}
         <View
           style={{
             height: 50,
