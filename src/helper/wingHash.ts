@@ -36,6 +36,8 @@ export const wingHash=(dataMake:unknown,callback:(res:unknown)=>void)=>{
  
      return callback({ data: requestData, err_code: 200 });
    } catch (error) {
+    console.log('---')
+     console.log(error)
      return callback({ data: error, err_code: 400 });
    }
  }

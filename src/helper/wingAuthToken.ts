@@ -2,13 +2,21 @@ import axios from "axios";
 import qs from 'qs';
 
 export const wingAuthToken=async(callback:(res:unknown)=>void)=>{
-   const data = {
-     username: "online.hrddeeplink",
-     password: "914bade01fd32493a0f2efc583e1a5f6",
-     client_id: "third_party",
-     client_secret: "16681c9ff419d8ecc7cfe479eb02a7a",
-     grant_type: "password"
-   };
+  //  const data = {
+  //    username: "online.hrddeeplink",
+  //    password: "914bade01fd32493a0f2efc583e1a5f6",
+  //    client_id: "third_party",
+  //    client_secret: "16681c9ff419d8ecc7cfe479eb02a7a",
+  //    grant_type: "password"
+  //  };
+  // PROD
+   const data={
+    username: "online.hrdkoreadeep",
+    password: "512936b93fde7434b4313ec5ae20403e",
+    client_id: "third_party",
+    client_secret: "16681c9ff419d8ecc7cfe479eb02a7a",
+    grant_type: "password"
+   }
    const URL_WING_DEEP_LINK = "https://ir.wingmoney.com:9443/RestEngine";
    try {
      const formData = qs.stringify(data);
@@ -24,12 +32,14 @@ export const wingAuthToken=async(callback:(res:unknown)=>void)=>{
        });
      })
      .catch(error => {
+        console.log('-aut',error)
        return callback({
          err_code:400,
          data:error
        });
      });
    } catch (er) {
+    console.log('-aut2',er)
      return callback({
        err_code:400,
        data:er

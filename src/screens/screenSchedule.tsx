@@ -548,7 +548,7 @@ export default function ScreenSchedule(props: any) {
     //* 6. Push back to EPS server
     const currency = 'USD';
     const merchant_id = '4783';
-    const merchant_name = 'online.hrddeeplink';
+    const merchant_name = 'online.hrdkoreadeep';
     const order_reference_no = tran_id;
     const schema_url = "epstopikapp://main/form";
     const item_name= "Payin";
@@ -585,18 +585,11 @@ export default function ScreenSchedule(props: any) {
             wingCreatingTransaction(dataDeep,access_token,(resDeep)=>{
               if(Object(resDeep)?.err_code==200 && Object(resDeep)?.data?.redirect_url){
                 setLoadingPayment(true);
-                const url=`${Object(resDeep)?.data?.redirect_url}`;
+                console.log(Object(resDeep)?.data?.redirect_url)
                 setTimeout(async() => {
-                  try{
-                    const supported = await Linking.canOpenURL(url);
-                    if (supported) {
-                      Linking.openURL(url);
-                    } else {
-                      wingGotoStore();
-                    }
-                  }catch(e){
+                  Linking.openURL(`${Object(resDeep)?.data?.redirect_url}`).catch((e)=>{
                     wingGotoStore();
-                  }
+                  });
                 }, 500);
                 // request for verify code
                 wingAuthToken((authVerify)=>{
@@ -633,7 +626,7 @@ export default function ScreenSchedule(props: any) {
               }else{
                 setLoading({loading:false,label:""});
                 showMessage({
-                  message: "សូមអភ័យទោស ការបង់ប្រាក់តាមវីងមានបញ្ហា!",
+                  message: "សូមអភ័យទោស ការបង់ប្រាក់តាមវីងមានបញ្ហា! ២",
                   type: "danger",
                   backgroundColor: "red",
                   color: "white",
@@ -646,7 +639,7 @@ export default function ScreenSchedule(props: any) {
         }else{
           setLoading({loading:false,label:""});
           showMessage({
-            message: "សូមអភ័យទោស ការបង់ប្រាក់តាមវីងមានបញ្ហា!",
+            message: "សូមអភ័យទោស ការបង់ប្រាក់តាមវីងមានបញ្ហា!៣",
             type: "danger",
             backgroundColor: "red",
             color: "white",
@@ -659,7 +652,7 @@ export default function ScreenSchedule(props: any) {
     setLoadingPayment(false);
     setLoading({loading:false,label:""});
     showMessage({
-      message: "សូមអភ័យទោស ការបង់ប្រាក់តាមវីងមានបញ្ហា!",
+      message: "សូមអភ័យទោស ការបង់ប្រាក់តាមវីងមានបញ្ហា! ១",
       type: "danger",
       backgroundColor: "red",
       color: "white",
@@ -1070,7 +1063,7 @@ export default function ScreenSchedule(props: any) {
       passport:trimEmptyString(passport)
     }
     props?.useVerify({ ...input });
-    setTimeout(() => setPreview(false), 1000);
+    setTimeout(() => setPreview(false), 100);
   }
   const supperClearVerify = () => {
     if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
