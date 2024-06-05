@@ -7,27 +7,49 @@ export const wingPaymentStatus=async(order_reference_no:string,access_token:stri
     //   order_reference_no: order_reference_no,
     //   merchant_name:"online.hrddeeplink"
     // };
-    const data = {
+    //   const data = {
+    //     order_reference_no: order_reference_no,
+    //     merchant_name:"online.hrdkoreadeep"
+    //   };
+    //   axios.post(`https://ir.wingmoney.com:9443/RestEngine/api/v1/checktxnstatus`, data, {
+    //     headers: {
+    //       "Authorization": `Bearer ${access_token}`
+    //     }
+    // })
+    // .then(response => {
+    //   callback({
+    //     err_code:200,
+    //     data:response?.data
+    //   });
+    // })
+    // .catch(error => {
+    //   callback({
+    //     err_code:400,
+    //     data:error
+    //   });
+    // });
+    // Production
+    const data={
       order_reference_no: order_reference_no,
-      merchant_name:"online.hrdkoreadeep"
-    };
-    axios.post(`https://ir.wingmoney.com:9443/RestEngine/api/v1/checktxnstatus`, data, {
-      headers: {
-        "Authorization": `Bearer ${access_token}`
-      }
-  })
-  .then(response => {
-    callback({
-      err_code:200,
-      data:response?.data
+      access_token
+    }
+    axios.post(`https://epstopikapi.mtosb.gov.kh/wing/deep-link/check-status`, data, {
+        headers: {
+          "Authorization": `Bearer ${access_token}`
+        }
+    })
+    .then(response => {
+      callback({
+        err_code:200,
+        data:response?.data
+      });
+    })
+    .catch(error => {
+      callback({
+        err_code:400,
+        data:error
+      });
     });
-  })
-  .catch(error => {
-    callback({
-      err_code:400,
-      data:error
-    });
-  });
   } catch (error) {
     callback({
       err_code:400,

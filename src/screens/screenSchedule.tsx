@@ -45,6 +45,7 @@ import { ABA_PAYWAY_KEY,
   ABA_PAYWAY_CHECK_TRANSACTION,
   HASH,
   ABA_FORM_WRONG_HASH,
+  API_HOST
    } from '@env';
 import CryptoJS from 'crypto-js';
 import LoadingPayment from "../components/LoadingPayment";
@@ -533,7 +534,7 @@ export default function ScreenSchedule(props: any) {
     }
   };
   
-  const PaymentViaWing = async ({ 
+  const PaymentViaWingDEV = async ({ 
     tran_id,
     amount,
     phone,
@@ -660,7 +661,97 @@ export default function ScreenSchedule(props: any) {
       duration: 3000,
     });
   }
-}
+  }
+
+  const PaymentViaWingDeepLink=async({
+    tran_id,
+    amount,
+    phone,
+    schedule,
+    userId
+  }:any)=>{
+    const data={
+      order_reference_no:tran_id,
+      amount
+    }
+    const response = await axios.post('deep-link/wing-deep-link', data, {
+      headers: {
+        Referer: REFERER,
+      },
+    });
+  if (Object(response?.data)?.message === 'success') {
+      const access_token=response.data.access_token;
+      const redirectLink=response.data?.data?.redirect_url
+      setLoadingPayment(true);
+      console.log(redirectLink);
+      setTimeout(async() => {
+        Linking.openURL(`${redirectLink}`).catch((e)=>{
+          wingGotoStore();
+        });
+      }, 500);
+      paymentIntervalWING = setInterval(() => {
+        wingPaymentStatus(tran_id,access_token,(resPaymentStatus)=>{
+         console.log(Object(resPaymentStatus)?.data)
+          if( Object(resPaymentStatus)?.data?.transaction_id!==''){
+            clearInterval(paymentIntervalWING);
+            const newDate = moment(new Date()).format('YYYYMMDDHHmmss');
+            pushBackMobileWING({
+              req_time: newDate,
+              tran_id: tran_id,
+              amount: amount,
+              device: Platform.OS === 'ios' ? 'ios' : 'android',
+              phone,
+              schedule,
+              userId,
+              payment:'WING'
+            });
+          }
+          // else skip verify
+        })
+      }, 5000);
+      // clear check payment to wing
+      setTimeout(() => {
+        clearInterval(paymentIntervalWING);
+        setLoadingPayment(false);
+        setLoading({loading:false,label:""});
+        if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
+      }, 180000);
+  }else{
+    // if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
+  }
+
+    // const response = await fetch(`${API_HOST}/deep-link/wing-deep-link`, {
+    //   method: 'POST',
+    //   body:{
+    //     order_reference_no:tran_id,
+    //     amount:amount
+    //   },
+    //   headers: {
+    //     'Referer': REFERER,
+    //   },
+    // });
+  
+  // if(response.status===200 && response.url && response.url!==ABA_FORM_WRONG_HASH ){
+  //   setLoading({loading:false,label:""});
+  //   NavigationServer.navigate(navRoutes.BAKONG,{
+  //     amount,  
+  //     tran_id,url:response.url,
+  //     phone,
+  //     schedule:isScheduleInfo?.id,
+  //     userId:isUserInfo.id
+  //   })
+  // }else{
+  //   showMessage({
+  //     message: "សូមអភ័យទោស ការបង់ប្រាក់តាមបាគងបញ្ហា!",
+  //     type: "danger",
+  //     backgroundColor: "red",
+  //     color: "white",
+  //     icon: "warning",
+  //     duration: 3000,
+  //   });
+  // }
+  }
+ 
   // Check User Result Profile
   React.useEffect(() => {
     if (resultProfile && resultProfile?.message === 'success') {
@@ -805,13 +896,20 @@ export default function ScreenSchedule(props: any) {
           })
         }else{
           setLoading({ label: I18n.t('messageRequiringPayment'), loading: true, type: 'payment' });
-          PaymentViaWing({
-              tran_id: submitForm?.data,
+          // PaymentViaWing({
+          //     tran_id: submitForm?.data,
+          //     amount: isScheduleInfo.price,
+          //     phone,
+          //     schedules:isScheduleInfo.id,
+          //     userId:isUserInfo.id,
+          // });
+          PaymentViaWingDeepLink({
+            tran_id: submitForm?.data,
               amount: isScheduleInfo.price,
               phone,
               schedules:isScheduleInfo.id,
               userId:isUserInfo.id,
-          });
+          })
         }
       }
     })()
@@ -1065,12 +1163,13 @@ export default function ScreenSchedule(props: any) {
     props?.useVerify({ ...input });
     setTimeout(() => setPreview(false), 100);
   }
-  const supperClearVerify = () => {
+  const supperClearVerify = async() => {
+    await clearInterval(paymentIntervalWING);
+    await clearInterval(paymentInterval);
     if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
     setLoading({'loading':false,label:''});
     setLoadingPayment(false);
-    clearInterval(paymentIntervalWING);
-    clearInterval(paymentInterval);
+    
   }
   return (
     <React.Fragment>
@@ -1093,7 +1192,7 @@ export default function ScreenSchedule(props: any) {
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
             style={styles.bodyScroll}>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => {
                 setValue('fullName', 'BIENSOTHEARITH');
                 setValue('gender', 'Male');
@@ -1110,7 +1209,7 @@ export default function ScreenSchedule(props: any) {
               }
               }>
               <Text style={{color:'red'}}>AA</Text>
-            </TouchableOpacity> 
+            </TouchableOpacity>  */}
             <TextInput
               inputStyle={{
                 fontSize: 16,
