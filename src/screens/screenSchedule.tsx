@@ -168,6 +168,8 @@ export default function ScreenSchedule(props: any) {
   const [isPreview, setPreview] = React.useState(false);
   const [isNoSchedule, setNoSchedule] = React.useState(false);
   const [isLoadingPayment, setLoadingPayment] = React.useState(false);
+  const [isLoadingWINGWaiting, setLoadingWINGWaiting] = React.useState(false);
+  const [intervalIdWINGDeepLink, setIntervalIdWINGDeepLink] = React.useState<NodeJS.Timeout | null>(null);;
   const [isLoading, setLoading] = React.useState<{
     loading: boolean,
     label: string
@@ -473,7 +475,8 @@ export default function ScreenSchedule(props: any) {
       phone,
       schedule,
       userId,
-      payment
+      payment,
+      detail
     }=payload;
     try {
       const dataToHash = req_time + tran_id+amount+device+phone+schedule+userId+payment;
@@ -487,6 +490,7 @@ export default function ScreenSchedule(props: any) {
      const base64EncodedHash = CryptoJS.enc.Base64.stringify(hmacSha512);
      const data = {
       hash:base64EncodedHash,
+      detail,
       tran_id,req_time,amount,device,phone,schedule,id:userId,payment
      };
      const response = await axios.post('push-back-mobile', data, {
@@ -598,7 +602,8 @@ export default function ScreenSchedule(props: any) {
                   const token_verify=Object(authVerify)?.data?.access_token!==''?Object(authVerify)?.data?.access_token:access_token
                   paymentIntervalWING = setInterval(() => {
                     wingPaymentStatus(order_reference_no,token_verify,(resPaymentStatus)=>{
-                      if( Object(resPaymentStatus)?.data?.transaction_id!==''){
+                      console.log('==-=>',Object(resPaymentStatus)?.data)
+                      if(Object(resPaymentStatus)?.data?.transaction_id!==''){
                         clearInterval(paymentIntervalWING);
                         const newDate = moment(new Date()).format('YYYYMMDDHHmmss');
                         pushBackMobileWING({
@@ -609,7 +614,8 @@ export default function ScreenSchedule(props: any) {
                           phone,
                           schedule,
                           userId,
-                          payment:'WING'
+                          payment:'WING',
+                          detail:JSON.stringify(Object(resPaymentStatus)?.data)
                         });
                       }
                       // else skip verify
@@ -662,7 +668,15 @@ export default function ScreenSchedule(props: any) {
     });
   }
   }
-
+  const supperClearVerify = async() => {
+    console.log(intervalIdWINGDeepLink)
+    if(intervalIdWINGDeepLink)clearInterval(intervalIdWINGDeepLink);
+    clearInterval(paymentInterval);
+    if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
+    setLoading({'loading':false,label:''});
+    setLoadingPayment(false);
+    setLoadingWINGWaiting(false);
+  }
   const PaymentViaWingDeepLink=async({
     tran_id,
     amount,
@@ -683,39 +697,76 @@ export default function ScreenSchedule(props: any) {
       const access_token=response.data.access_token;
       const redirectLink=response.data?.data?.redirect_url
       setLoadingPayment(true);
+      setLoadingWINGWaiting(true);
       console.log(redirectLink);
       setTimeout(async() => {
         Linking.openURL(`${redirectLink}`).catch((e)=>{
           wingGotoStore();
         });
       }, 500);
-      paymentIntervalWING = setInterval(() => {
-        wingPaymentStatus(tran_id,access_token,(resPaymentStatus)=>{
-         console.log(Object(resPaymentStatus)?.data)
-          if( Object(resPaymentStatus)?.data?.transaction_id!==''){
-            clearInterval(paymentIntervalWING);
-            const newDate = moment(new Date()).format('YYYYMMDDHHmmss');
-            pushBackMobileWING({
-              req_time: newDate,
-              tran_id: tran_id,
-              amount: amount,
-              device: Platform.OS === 'ios' ? 'ios' : 'android',
-              phone,
-              schedule,
-              userId,
-              payment:'WING'
-            });
-          }
-          // else skip verify
-        })
-      }, 5000);
+      // Waiting callback 10s
+      let waitingCallback=setInterval(()=>{
+        if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
+      },3000);
+      // call verify directly
+      let aa:any=null;
+      setTimeout(()=>{
+        let i=1;
+        clearInterval(waitingCallback)
+        aa=(setInterval(() => {
+        setLoading({loading:true,label: I18n.t('messageRequiringTransaction')});
+         return wingPaymentStatus(tran_id,access_token,(resPaymentStatus)=>{
+            const transaction_idBack=Object(resPaymentStatus)?.data?.transaction_id;
+            if(typeof transaction_idBack==='string' && transaction_idBack!==''){
+              const newDate = moment(new Date()).format('YYYYMMDDHHmmss');
+                if(aa)clearInterval(aa);
+                setLoadingWINGWaiting(false);
+                pushBackMobileWING({
+                  req_time: newDate,
+                  tran_id: tran_id,
+                  amount: amount,
+                  device: Platform.OS === 'ios' ? 'ios' : 'android',
+                  phone,
+                  schedule,
+                  userId,
+                  payment:'WING',
+                  detail:JSON.stringify(Object(resPaymentStatus)?.data)
+              });
+            }
+          })
+        },5000));
+        return setIntervalIdWINGDeepLink(aa);
+      },10000)
+
+      // paymentIntervalWING = setInterval(() => {
+      //   wingPaymentStatus(tran_id,access_token,(resPaymentStatus)=>{
+      //    console.log(Object(resPaymentStatus)?.data)
+      //     if( Object(resPaymentStatus)?.data?.transaction_id!==''){
+      //       clearInterval(paymentIntervalWING);
+      //       const newDate = moment(new Date()).format('YYYYMMDDHHmmss');
+      //       pushBackMobileWING({
+      //         req_time: newDate,
+      //         tran_id: tran_id,
+      //         amount: amount,
+      //         device: Platform.OS === 'ios' ? 'ios' : 'android',
+      //         phone,
+      //         schedule,
+      //         userId,
+      //         payment:'WING'
+      //       });
+      //     }
+      //     // else skip verify
+      //   })
+      // }, 5000);
       // clear check payment to wing
-      setTimeout(() => {
-        clearInterval(paymentIntervalWING);
+    setIntervalIdWINGDeepLink(aa);
+     return setTimeout(() => {
+        if(aa)clearInterval(aa);
         setLoadingPayment(false);
         setLoading({loading:false,label:""});
+        setLoadingWINGWaiting(false);
         if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
-      }, 180000);
+      }, 170000);
   }else{
     // if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
   }
@@ -1163,18 +1214,11 @@ export default function ScreenSchedule(props: any) {
     props?.useVerify({ ...input });
     setTimeout(() => setPreview(false), 100);
   }
-  const supperClearVerify = async() => {
-    await clearInterval(paymentIntervalWING);
-    await clearInterval(paymentInterval);
-    if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
-    setLoading({'loading':false,label:''});
-    setLoadingPayment(false);
-    
-  }
+
   return (
     <React.Fragment>
       <Layout
-        loading={loadingHome || refreshing || isLoading.loading}
+        loading={loadingHome || refreshing || isLoading.loading || isLoadingWINGWaiting}
         typeScreenSchedule
         centerTitle={isScheduleInfo?.name}
         handleLeftBack={() => Navigation.goBack()}
