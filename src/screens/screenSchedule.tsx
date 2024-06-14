@@ -704,69 +704,37 @@ export default function ScreenSchedule(props: any) {
           wingGotoStore();
         });
       }, 500);
-      // Waiting callback 10s
-      let waitingCallback=setInterval(()=>{
-        if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
-      },3000);
-      // call verify directly
-      let aa:any=null;
-      setTimeout(()=>{
-        let i=1;
-        clearInterval(waitingCallback)
-        aa=(setInterval(() => {
-        setLoading({loading:true,label: I18n.t('messageRequiringTransaction')});
-         return wingPaymentStatus(tran_id,access_token,(resPaymentStatus)=>{
-            const transaction_idBack=Object(resPaymentStatus)?.data?.transaction_id;
-            if(typeof transaction_idBack==='string' && transaction_idBack!==''){
-              const newDate = moment(new Date()).format('YYYYMMDDHHmmss');
-                if(aa)clearInterval(aa);
-                setLoadingWINGWaiting(false);
-                pushBackMobileWING({
-                  req_time: newDate,
-                  tran_id: tran_id,
-                  amount: amount,
-                  device: Platform.OS === 'ios' ? 'ios' : 'android',
-                  phone,
-                  schedule,
-                  userId,
-                  payment:'WING',
-                  detail:JSON.stringify(Object(resPaymentStatus)?.data)
-              });
-            }
-          })
-        },5000));
-        return setIntervalIdWINGDeepLink(aa);
-      },10000)
+      paymentIntervalWING = setInterval(() => {
+        wingPaymentStatus(tran_id,access_token,(resPaymentStatus)=>{
+          const transaction_idBack=Object(resPaymentStatus)?.data?.transaction_id;
+          console.log(resPaymentStatus)
+          console.log(typeof transaction_idBack==='string' && transaction_idBack!=='')
+          if(typeof transaction_idBack==='string' && transaction_idBack!==''){
+            clearInterval(paymentIntervalWING);
+            const newDate = moment(new Date()).format('YYYYMMDDHHmmss');
+            pushBackMobileWING({
+              req_time: newDate,
+              tran_id: tran_id,
+              amount: amount,
+              device: Platform.OS === 'ios' ? 'ios' : 'android',
+              phone,
+              schedule,
+              userId,
+              payment:'WING',
+              detail:JSON.stringify(Object(resPaymentStatus)?.data)
+            });
+          }
+          // else skip verify
+        })
+      }, 5000);
+    setIntervalIdWINGDeepLink(paymentIntervalWING);
+    setTimeout(() => {
+      clearInterval(paymentIntervalWING);
+      setLoadingPayment(false);
+      setLoading({loading:false,label:""});
+      if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
+    }, 180000);
 
-      // paymentIntervalWING = setInterval(() => {
-      //   wingPaymentStatus(tran_id,access_token,(resPaymentStatus)=>{
-      //    console.log(Object(resPaymentStatus)?.data)
-      //     if( Object(resPaymentStatus)?.data?.transaction_id!==''){
-      //       clearInterval(paymentIntervalWING);
-      //       const newDate = moment(new Date()).format('YYYYMMDDHHmmss');
-      //       pushBackMobileWING({
-      //         req_time: newDate,
-      //         tran_id: tran_id,
-      //         amount: amount,
-      //         device: Platform.OS === 'ios' ? 'ios' : 'android',
-      //         phone,
-      //         schedule,
-      //         userId,
-      //         payment:'WING'
-      //       });
-      //     }
-      //     // else skip verify
-      //   })
-      // }, 5000);
-      // clear check payment to wing
-    setIntervalIdWINGDeepLink(aa);
-     return setTimeout(() => {
-        if(aa)clearInterval(aa);
-        setLoadingPayment(false);
-        setLoading({loading:false,label:""});
-        setLoadingWINGWaiting(false);
-        if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
-      }, 170000);
   }else{
     // if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
   }
@@ -1236,7 +1204,7 @@ export default function ScreenSchedule(props: any) {
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
             style={styles.bodyScroll}>
-            {/* <TouchableOpacity
+             <TouchableOpacity
               onPress={() => {
                 setValue('fullName', 'BIENSOTHEARITH');
                 setValue('gender', 'Male');
@@ -1253,7 +1221,7 @@ export default function ScreenSchedule(props: any) {
               }
               }>
               <Text style={{color:'red'}}>AA</Text>
-            </TouchableOpacity>  */}
+            </TouchableOpacity>  
             <TextInput
               inputStyle={{
                 fontSize: 16,
