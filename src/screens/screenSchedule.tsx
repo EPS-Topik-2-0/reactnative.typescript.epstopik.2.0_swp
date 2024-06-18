@@ -143,7 +143,6 @@ function NoSchedule() {
     </View>
   );
 }
-
 export default function ScreenSchedule(props: any) {
   let paymentInterval: string | number | NodeJS.Timeout | undefined;
   let paymentIntervalWING: string | number | NodeJS.Timeout | undefined;
@@ -168,7 +167,6 @@ export default function ScreenSchedule(props: any) {
   const [isPreview, setPreview] = React.useState(false);
   const [isNoSchedule, setNoSchedule] = React.useState(false);
   const [isLoadingPayment, setLoadingPayment] = React.useState(false);
-  const [isLoadingWINGWaiting, setLoadingWINGWaiting] = React.useState(false);
   const [intervalIdWINGDeepLink, setIntervalIdWINGDeepLink] = React.useState<NodeJS.Timeout | null>(null);;
   const [isLoading, setLoading] = React.useState<{
     loading: boolean,
@@ -697,7 +695,6 @@ export default function ScreenSchedule(props: any) {
       const access_token=response.data.access_token;
       const redirectLink=response.data?.data?.redirect_url
       setLoadingPayment(true);
-      setLoadingWINGWaiting(true);
       console.log(redirectLink);
       setTimeout(async() => {
         Linking.openURL(`${redirectLink}`).catch((e)=>{
@@ -738,37 +735,6 @@ export default function ScreenSchedule(props: any) {
   }else{
     // if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
   }
-
-    // const response = await fetch(`${API_HOST}/deep-link/wing-deep-link`, {
-    //   method: 'POST',
-    //   body:{
-    //     order_reference_no:tran_id,
-    //     amount:amount
-    //   },
-    //   headers: {
-    //     'Referer': REFERER,
-    //   },
-    // });
-  
-  // if(response.status===200 && response.url && response.url!==ABA_FORM_WRONG_HASH ){
-  //   setLoading({loading:false,label:""});
-  //   NavigationServer.navigate(navRoutes.BAKONG,{
-  //     amount,  
-  //     tran_id,url:response.url,
-  //     phone,
-  //     schedule:isScheduleInfo?.id,
-  //     userId:isUserInfo.id
-  //   })
-  // }else{
-  //   showMessage({
-  //     message: "សូមអភ័យទោស ការបង់ប្រាក់តាមបាគងបញ្ហា!",
-  //     type: "danger",
-  //     backgroundColor: "red",
-  //     color: "white",
-  //     icon: "warning",
-  //     duration: 3000,
-  //   });
-  // }
   }
  
   // Check User Result Profile
@@ -1186,7 +1152,7 @@ export default function ScreenSchedule(props: any) {
   return (
     <React.Fragment>
       <Layout
-        loading={loadingHome || refreshing || isLoading.loading || isLoadingWINGWaiting}
+        loading={loadingHome || refreshing || isLoading.loading}
         typeScreenSchedule
         centerTitle={isScheduleInfo?.name}
         handleLeftBack={() => Navigation.goBack()}
@@ -1204,7 +1170,7 @@ export default function ScreenSchedule(props: any) {
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
             style={styles.bodyScroll}>
-             <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => {
                 setValue('fullName', 'BIENSOTHEARITH');
                 setValue('gender', 'Male');
@@ -1221,7 +1187,7 @@ export default function ScreenSchedule(props: any) {
               }
               }>
               <Text style={{color:'red'}}>AA</Text>
-            </TouchableOpacity>  
+            </TouchableOpacity>   */}
             <TextInput
               inputStyle={{
                 fontSize: 16,
