@@ -33,7 +33,7 @@ export const wingPaymentStatus=async(order_reference_no:string,access_token:stri
       order_reference_no: order_reference_no,
       access_token
     }
-    axios.post(`https://epstopikapi.mtosb.gov.kh/wing/deep-link/check-status`, data, {
+    axios.post(`https://epstopikapi.mtosb.gov.kh/v2/deep-link/check-status`, data, {
         headers: {
           "Authorization": `Bearer ${access_token}`
         }

@@ -673,7 +673,6 @@ export default function ScreenSchedule(props: any) {
     if (props?.useResultProfile) props?.useResultProfile({ schedule: isScheduleInfo.id })
     setLoading({'loading':false,label:''});
     setLoadingPayment(false);
-    setLoadingWINGWaiting(false);
   }
   const PaymentViaWingDeepLink=async({
     tran_id,
